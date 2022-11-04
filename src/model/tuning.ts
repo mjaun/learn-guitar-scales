@@ -2,7 +2,7 @@ import {Note} from "./note";
 
 export class Tuning {
     static fromString(tuningString: string): Tuning {
-        return new Tuning(tuningString.split('-').reverse().map(noteName => Note.fromName(noteName)));
+        return new Tuning(tuningString.split('-').map(noteName => Note.fromName(noteName)).reverse());
     }
 
     readonly notes: Note[];
@@ -12,6 +12,6 @@ export class Tuning {
     }
 
     toString(): string {
-        return this.notes.reverse().map(note => note.name).join('-');
+        return this.notes.map(note => note.name).reverse().join('-');
     }
 }

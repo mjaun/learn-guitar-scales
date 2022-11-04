@@ -133,8 +133,6 @@ export class Fretboard extends React.PureComponent<Props, State> {
             return;
         }
 
-        console.log(this.props.data.tuning);
-
         let ctx = this.canvas.current.getContext('2d');
 
         if (!ctx) {
