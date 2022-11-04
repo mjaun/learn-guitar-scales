@@ -24,7 +24,6 @@ const style = {
         'teal',
         'turquoise',
     ],
-    patternBorder: 'black solid 2px',
 };
 
 export interface FretboardSettings {
@@ -32,13 +31,11 @@ export interface FretboardSettings {
     lastFret: number,
     openStrings: boolean,
     labels: 'notes' | 'scale-degrees',
-    pattern: boolean,
 }
 
 type Props = {
     settings: FretboardSettings,
     data: FretboardData,
-    pattern?: FretboardData,
     onClick?: (position: FretboardPosition) => void,
 }
 
@@ -226,9 +223,8 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
     private drawPosition(ctx: CanvasRenderingContext2D, position: FretboardPosition) {
         const content = this.props.data.getContent(position);
-        const pattern = this.props.pattern && this.props.pattern.getContent(position) !== undefined;
 
-        if (!content && !pattern) {
+        if (!content) {
             return;
         }
 
@@ -243,8 +239,6 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
         if (content) {
             this.drawContent(ctx, position, content);
-        } else {
-            this.drawPattern(ctx, position);
         }
 
         ctx.restore();
@@ -269,21 +263,6 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
         if (this.props.settings.labels === "scale-degrees") {
             ctx.fillText(content.degree.name, 0, 8);
-        }
-    }
-
-    private drawPattern(ctx: CanvasRenderingContext2D, position: FretboardPosition) {
-        if (!this.props.settings.pattern) {
-            return;
-        }
-
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-
-        if (position.fret === 0) {
-            strokeCircle(ctx, 0, 0, style.openNoteSize / 2);
-        } else {
-            strokeCircle(ctx, 0, 0, style.noteSize / 2);
         }
     }
 
@@ -320,10 +299,4 @@ function fillCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: num
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
     ctx.fill();
-}
-
-function strokeCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, radius: number) {
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    ctx.stroke();
 }

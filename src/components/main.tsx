@@ -8,11 +8,7 @@ import ReactDOM from "react-dom";
 import {FretboardSettings} from "./fretboard";
 import {Scale} from "../model/scale";
 import {Setup} from "./setup";
-import {Exercise, ExerciseController} from "./exercise";
-import {MarkDegreeOnStringExercise} from "../exercises/mark-degree-on-string-exercise";
-import {MarkDegreeExercise} from "../exercises/mark-degree-exercise";
 import {Note} from "../model/note";
-import {MarkNoteExercise} from "../exercises/mark-note-exercise";
 import {Tuning} from "../model/tuning";
 
 type SerializableState = {
@@ -45,36 +41,16 @@ export class Main extends React.Component<{}, State> {
     }
 
     private renderContent() {
-        const controllers: {[index: string]: ExerciseController} = {
-            "mark-degree": new MarkDegreeExercise(this.state.fretboardSettings, this.state.scale, this.state.tuning),
-            "mark-degree-on-string": new MarkDegreeOnStringExercise(this.state.fretboardSettings, this.state.scale, this.state.tuning),
-            "mark-note": new MarkNoteExercise(this.state.fretboardSettings, this.state.scale, this.state.tuning),
-        };
-
-        if (this.state.mode === "setup") {
-            return (
-                <Setup
-                    fretboardSettings={this.state.fretboardSettings}
-                    scale={this.state.scale}
-                    tuning={this.state.tuning}
-                    controllers={controllers}
-                    onFretboardSettingsChanged={this.onFretboardSettingsChanged.bind(this)}
-                    onScaleChanged={this.onScaleChanged.bind(this)}
-                    onTuningChanged={this.onTuningChanged.bind(this)}
-                    onStart={this.onStart.bind(this)}
-                />
-            );
-        } else {
-            return (
-                <Exercise
-                    fretboardSettings={this.state.fretboardSettings}
-                    scale={this.state.scale}
-                    controller={controllers[this.state.mode]}
-                    onSetup={this.onSetup.bind(this)}
-                />
-            );
-
-        }
+        return (
+            <Setup
+                fretboardSettings={this.state.fretboardSettings}
+                onFretboardSettingsChanged={this.onFretboardSettingsChanged.bind(this)}
+                scale={this.state.scale}
+                onScaleChanged={this.onScaleChanged.bind(this)}
+                tuning={this.state.tuning}
+                onTuningChanged={this.onTuningChanged.bind(this)}
+            />
+        );
     }
 
     componentDidUpdate(): void {
@@ -91,14 +67,6 @@ export class Main extends React.Component<{}, State> {
 
     private onTuningChanged(tuning: Tuning) {
         this.setState({tuning});
-    }
-
-    private onStart(exercise: string) {
-        this.setState({mode: exercise});
-    }
-
-    private onSetup() {
-        this.setState({mode: "setup"});
     }
 
     private saveState() {

@@ -15,31 +15,6 @@ button {
     margin-bottom: 2.5em;
 }
 
-#exercise-content {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-#exercise-text {
-    vertical-align: center;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    flex-grow: 1;
-}
-
-#exercise-text .correct {
-    color: #28a745;
-}
-
-#exercise-text .wrong {
-    color: #dc3545;
-}
-
-#exercise-buttons button {
-    margin-left: 1em;
-}
-
-#setup-fretboard, #setup-exercise {
+#setup-fretboard {
     margin-bottom: 1.5em;
 }

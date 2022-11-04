@@ -3,18 +3,15 @@ import {Fretboard, FretboardSettings} from "./fretboard";
 import {Note} from "../model/note";
 import {Scale} from "../model/scale";
 import {FretboardData} from "../model/fretboard-data";
-import {ExerciseController} from "./exercise";
 import {Tuning} from "../model/tuning";
 
 type Props = {
     fretboardSettings: FretboardSettings,
     onFretboardSettingsChanged: (fretboardSettings: FretboardSettings) => void,
     scale: Scale,
-    tuning: Tuning,
-    controllers: {[index: string]: ExerciseController},
     onScaleChanged: (scale: Scale) => void,
+    tuning: Tuning,
     onTuningChanged: (tuning: Tuning) => void,
-    onStart: (exercise: string) => void,
 }
 
 export class Setup extends React.Component<Props> {
@@ -24,7 +21,6 @@ export class Setup extends React.Component<Props> {
             lastFret: 8,
             openStrings: false,
             labels: 'scale-degrees',
-            pattern: false,
         }
     };
 
@@ -45,7 +41,6 @@ export class Setup extends React.Component<Props> {
         lastFret: React.createRef<HTMLSelectElement>(),
         openStrings: React.createRef<HTMLInputElement>(),
         showDegrees: React.createRef<HTMLInputElement>(),
-        pattern: React.createRef<HTMLInputElement>(),
     };
 
     render() {
@@ -164,50 +159,6 @@ export class Setup extends React.Component<Props> {
             </form>
         );
 
-        const exerciseForm = (
-            <form>
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="form-group">
-                            <label htmlFor="select-exercise">Exercise</label>
-                            <select className="form-control"
-                                    id="select-exercise"
-                                    ref={this.inputs.exercise}>
-                                {Object.keys(this.props.controllers).map(key =>
-                                    <option key={key} value={key}>{this.props.controllers[key].name}</option>
-                                )}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="form-group">
-                            <label>Options</label>
-                            <div className="form-check">
-                                <input type="checkbox"
-                                       className="form-check-input"
-                                       id="check-show-pattern"
-                                       ref={this.inputs.pattern}
-                                       checked={this.props.fretboardSettings.pattern}
-                                       onChange={this.onFretboardSettingsChanged.bind(this)}/>
-                                <label className="form-check-label" htmlFor="check-show-pattern">Show Scale
-                                    Pattern</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <button type="submit" className="btn btn-primary" id="button-start"
-                                onClick={this.onStart.bind(this)}>
-                            Start
-                        </button>
-                    </div>
-                </div>
-            </form>
-        );
-
         const fretboardData = new FretboardData(this.props.tuning);
         fretboardData.setScale(this.props.scale);
         fretboardData.clip(
@@ -229,26 +180,18 @@ export class Setup extends React.Component<Props> {
                         {fretboardForm}
                     </div>
                 </div>
-
-                <div id="setup-exercise" className="card">
-                    <div className="card-body">
-                        <h5 className="card-title">Exercise</h5>
-                        {exerciseForm}
-                    </div>
-                </div>
             </div>
         );
     }
 
     private onFretboardSettingsChanged() {
         if (this.inputs.firstFret.current && this.inputs.lastFret.current && this.inputs.showDegrees.current &&
-            this.inputs.openStrings.current && this.inputs.pattern.current && this.inputs.tuning.current) {
+            this.inputs.openStrings.current && this.inputs.tuning.current) {
             this.props.onFretboardSettingsChanged({
                 firstFret: parseInt(this.inputs.firstFret.current.value),
                 lastFret: parseInt(this.inputs.lastFret.current.value),
                 labels: this.inputs.showDegrees.current.checked ? "scale-degrees" : "notes",
                 openStrings: this.inputs.openStrings.current.checked,
-                pattern: this.inputs.pattern.current.checked,
             });
         }
     }
@@ -265,12 +208,6 @@ export class Setup extends React.Component<Props> {
     private onTuningChanged() {
         if (this.inputs.tuning.current) {
             this.props.onTuningChanged(Tuning.fromString(this.inputs.tuning.current.value));
-        }
-    }
-
-    private onStart() {
-        if (this.inputs.exercise.current) {
-            this.props.onStart(this.inputs.exercise.current.value);
         }
     }
 }
