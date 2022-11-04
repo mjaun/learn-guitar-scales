@@ -13,16 +13,19 @@ import {MarkDegreeOnStringExercise} from "../exercises/mark-degree-on-string-exe
 import {MarkDegreeExercise} from "../exercises/mark-degree-exercise";
 import {Note} from "../model/note";
 import {MarkNoteExercise} from "../exercises/mark-note-exercise";
+import {Tuning} from "../model/tuning";
 
 type SerializableState = {
     scaleRootName: string,
     scaleName: string,
+    tuningString: string,
     fretboardSettings: FretboardSettings,
 }
 
 type State = {
     mode: string,
     scale: Scale,
+    tuning: Tuning,
     fretboardSettings: FretboardSettings,
 }
 
@@ -43,9 +46,9 @@ export class Main extends React.Component<{}, State> {
 
     private renderContent() {
         const controllers: {[index: string]: ExerciseController} = {
-            "mark-degree": new MarkDegreeExercise(this.state.fretboardSettings, this.state.scale),
-            "mark-degree-on-string": new MarkDegreeOnStringExercise(this.state.fretboardSettings, this.state.scale),
-            "mark-note": new MarkNoteExercise(this.state.fretboardSettings, this.state.scale),
+            "mark-degree": new MarkDegreeExercise(this.state.fretboardSettings, this.state.scale, this.state.tuning),
+            "mark-degree-on-string": new MarkDegreeOnStringExercise(this.state.fretboardSettings, this.state.scale, this.state.tuning),
+            "mark-note": new MarkNoteExercise(this.state.fretboardSettings, this.state.scale, this.state.tuning),
         };
 
         if (this.state.mode === "setup") {
@@ -53,9 +56,11 @@ export class Main extends React.Component<{}, State> {
                 <Setup
                     fretboardSettings={this.state.fretboardSettings}
                     scale={this.state.scale}
+                    tuning={this.state.tuning}
                     controllers={controllers}
                     onFretboardSettingsChanged={this.onFretboardSettingsChanged.bind(this)}
                     onScaleChanged={this.onScaleChanged.bind(this)}
+                    onTuningChanged={this.onTuningChanged.bind(this)}
                     onStart={this.onStart.bind(this)}
                 />
             );
@@ -84,6 +89,10 @@ export class Main extends React.Component<{}, State> {
         this.setState({scale});
     }
 
+    private onTuningChanged(tuning: Tuning) {
+        this.setState({tuning});
+    }
+
     private onStart(exercise: string) {
         this.setState({mode: exercise});
     }
@@ -96,6 +105,7 @@ export class Main extends React.Component<{}, State> {
         const state: SerializableState = {
             scaleName: this.state.scale.name,
             scaleRootName: this.state.scale.root.name,
+            tuningString: this.state.tuning.toString(),
             fretboardSettings: this.state.fretboardSettings,
         };
 
@@ -109,12 +119,14 @@ export class Main extends React.Component<{}, State> {
             this.state = {
                 mode: 'setup',
                 scale: new Scale(Note.fromName(state.scaleRootName), state.scaleName),
+                tuning: Tuning.fromString(state.tuningString),
                 fretboardSettings: state.fretboardSettings,
             }
         } catch (e) {
             this.state = {
                 mode: 'setup',
                 scale: Setup.getDefaultScale(),
+                tuning: Setup.getDefaultTuning(),
                 fretboardSettings: Setup.getDefaultFretboardSettings(),
             };
         }

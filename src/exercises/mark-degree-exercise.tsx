@@ -4,16 +4,19 @@ import {Scale} from "../model/scale";
 import {ScaleDegree} from "../model/scale-degree";
 import {FretboardData} from "../model/fretboard-data";
 import {Note} from "../model/note";
+import {Tuning} from "../model/tuning";
 
 export class MarkDegreeExercise implements ExerciseController {
     private readonly fretboardSettings: FretboardSettings;
     private readonly scale: Scale;
+    private readonly tuning: Tuning;
 
     private currentDegree: ScaleDegree;
 
-    constructor(fretboardSettings: FretboardSettings, scale: Scale) {
+    constructor(fretboardSettings: FretboardSettings, scale: Scale, tuning: Tuning) {
         this.fretboardSettings = fretboardSettings;
         this.scale = scale;
+        this.tuning = tuning;
         this.currentDegree = this.scale.degrees[0];
     }
 
@@ -33,7 +36,7 @@ export class MarkDegreeExercise implements ExerciseController {
     }
 
     validateAnswer(selection: FretboardData): boolean {
-        const correct = new FretboardData();
+        const correct = new FretboardData(this.tuning);
         correct.setDegree(this.currentDegree, this.scale);
         correct.clip(
             this.fretboardSettings.firstFret,

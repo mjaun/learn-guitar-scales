@@ -68,7 +68,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
     render() {
         const canvasStyle = {
             width: '100%',
-            height: style.stringSpacing * FretboardData.getStringCount() + style.topMargin,
+            height: style.stringSpacing * this.props.data.getStringCount() + style.topMargin,
         };
 
         return (
@@ -136,6 +136,8 @@ export class Fretboard extends React.PureComponent<Props, State> {
             return;
         }
 
+        console.log(this.props.data.tuning);
+
         let ctx = this.canvas.current.getContext('2d');
 
         if (!ctx) {
@@ -153,7 +155,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
         this.drawFretboard(ctx);
 
-        for (let string = 0; string < FretboardData.getStringCount(); string++) {
+        for (let string = 0; string < this.props.data.getStringCount(); string++) {
             if (this.props.settings.openStrings) {
                 this.drawPosition(ctx, {fret: 0, string});
             }
@@ -165,7 +167,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
     private drawFretboard(ctx: CanvasRenderingContext2D) {
         const fretboardWidth = (this.state.lastVisibleFret - this.state.firstVisibleFret + 1) * this.state.fretSpacing;
-        const fretboardHeight = style.stringSpacing * FretboardData.getStringCount();
+        const fretboardHeight = style.stringSpacing * this.props.data.getStringCount();
 
         // background
         ctx.fillStyle = 'bisque';
@@ -215,7 +217,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
         ctx.fillStyle = ctx.createPattern(this.stringImage, 'repeat-x') as CanvasPattern;
         ctx.save();
         ctx.translate(0, style.stringSpacing / 2 - this.stringImage.height / 2);
-        for (let string = 0; string < FretboardData.getStringCount(); string++) {
+        for (let string = 0; string < this.props.data.getStringCount(); string++) {
             ctx.fillRect(0, 0, fretboardWidth, this.stringImage.height);
             ctx.translate(0, style.stringSpacing);
         }
@@ -302,7 +304,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
         const string = Math.floor(y / style.stringSpacing);
 
-        if (string < 0 || string >= FretboardData.getStringCount()) {
+        if (string < 0 || string >= this.props.data.getStringCount()) {
             return;
         }
 

@@ -4,13 +4,16 @@ import {Note} from "../model/note";
 import {Scale} from "../model/scale";
 import {FretboardData} from "../model/fretboard-data";
 import {ExerciseController} from "./exercise";
+import {Tuning} from "../model/tuning";
 
 type Props = {
     fretboardSettings: FretboardSettings,
     onFretboardSettingsChanged: (fretboardSettings: FretboardSettings) => void,
     scale: Scale,
+    tuning: Tuning,
     controllers: {[index: string]: ExerciseController},
     onScaleChanged: (scale: Scale) => void,
+    onTuningChanged: (tuning: Tuning) => void,
     onStart: (exercise: string) => void,
 }
 
@@ -29,8 +32,13 @@ export class Setup extends React.Component<Props> {
         return new Scale(Note.fromName('A'), 'minor-pentatonic');
     }
 
+    static getDefaultTuning() {
+        return Tuning.fromString('E-A-D-G-B-E');
+    }
+
     private inputs = {
         exercise: React.createRef<HTMLSelectElement>(),
+        tuning: React.createRef<HTMLSelectElement>(),
         scale: React.createRef<HTMLSelectElement>(),
         root: React.createRef<HTMLSelectElement>(),
         firstFret: React.createRef<HTMLSelectElement>(),
@@ -47,6 +55,18 @@ export class Setup extends React.Component<Props> {
         const fretboardForm = (
             <form>
                 <div className="row">
+                    <div className="col-md-6">
+                        <div className="form-group">
+                            <label htmlFor="select-root">Root Note</label>
+                            <select className="form-control"
+                                    id="select-root"
+                                    ref={this.inputs.root}
+                                    value={this.props.scale.root.name}
+                                    onChange={this.onScaleChanged.bind(this)}>
+                                {rootNoteOptions.map(value => <option key={value}>{value}</option>)}
+                            </select>
+                        </div>
+                    </div>
                     <div className="col-md-6">
                         <div className="form-group">
                             <label htmlFor="select-scale">Scale</label>
@@ -71,16 +91,51 @@ export class Setup extends React.Component<Props> {
                                 <option value="chromatic">Chromatic</option>
                             </select>
                         </div>
+                    </div>
+                    <div className="col-md-6">
                         <div className="form-group">
-                            <label htmlFor="select-root">Root Note</label>
+                            <label htmlFor="select-first-fret">First Fret</label>
                             <select className="form-control"
-                                    id="select-root"
-                                    ref={this.inputs.root}
-                                    value={this.props.scale.root.name}
-                                    onChange={this.onScaleChanged.bind(this)}>
-                                {rootNoteOptions.map(value => <option key={value}>{value}</option>)}
+                                    id="select-first-fret"
+                                    ref={this.inputs.firstFret}
+                                    value={this.props.fretboardSettings.firstFret}
+                                    onChange={this.onFretboardSettingsChanged.bind(this)}>
+                                {fretOptions.map(value => <option key={value}>{value}</option>)}
                             </select>
                         </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="form-group">
+                            <label htmlFor="select-last-fret">Last Fret</label>
+                            <select className="form-control"
+                                    id="select-last-fret"
+                                    ref={this.inputs.lastFret}
+                                    value={this.props.fretboardSettings.lastFret}
+                                    onChange={this.onFretboardSettingsChanged.bind(this)}>
+                                {fretOptions.map(value => <option key={value}>{value}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="form-group">
+                            <label htmlFor="select-scale">Tuning</label>
+                            <select className="form-control"
+                                    id="select-tuning"
+                                    ref={this.inputs.tuning}
+                                    value={this.props.tuning.toString()}
+                                    onChange={this.onTuningChanged.bind(this)}>
+                                <option value="E-A-D-G-B-E">E Standard</option>
+                                <option value="Eb-Ab-Db-Gb-Bb-Eb">{Note.fromName('Eb').text} Standard</option>
+                                <option value="D-G-C-F-A-D">D Standard</option>
+                                <option value="C-F-Bb-Eb-G-C">C Standard</option>
+                                <option value="B-E-A-D-F#-B">B Standard</option>
+                                <option value="D-A-D-G-B-E">Dropped D</option>
+                                <option value="C-G-C-F-A-D">Dropped C</option>
+                                <option value="B-F#-B-E-G#-C#">Dropped B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="col-md-6">
                         <div className="form-group">
                             <label>Options</label>
                             <div className="form-check">
@@ -103,28 +158,6 @@ export class Setup extends React.Component<Props> {
                                 <label className="form-check-label" htmlFor="check-show-degrees">Show Scale
                                     Degrees</label>
                             </div>
-                        </div>
-                    </div>
-                    <div className="col-md-6">
-                        <div className="form-group">
-                            <label htmlFor="select-first-fret">First Fret</label>
-                            <select className="form-control"
-                                    id="select-first-fret"
-                                    ref={this.inputs.firstFret}
-                                    value={this.props.fretboardSettings.firstFret}
-                                    onChange={this.onFretboardSettingsChanged.bind(this)}>
-                                {fretOptions.map(value => <option key={value}>{value}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="select-last-fret">Last Fret</label>
-                            <select className="form-control"
-                                    id="select-last-fret"
-                                    ref={this.inputs.lastFret}
-                                    value={this.props.fretboardSettings.lastFret}
-                                    onChange={this.onFretboardSettingsChanged.bind(this)}>
-                                {fretOptions.map(value => <option key={value}>{value}</option>)}
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -175,7 +208,7 @@ export class Setup extends React.Component<Props> {
             </form>
         );
 
-        const fretboardData = new FretboardData();
+        const fretboardData = new FretboardData(this.props.tuning);
         fretboardData.setScale(this.props.scale);
         fretboardData.clip(
             this.props.fretboardSettings.firstFret,
@@ -209,7 +242,7 @@ export class Setup extends React.Component<Props> {
 
     private onFretboardSettingsChanged() {
         if (this.inputs.firstFret.current && this.inputs.lastFret.current && this.inputs.showDegrees.current &&
-            this.inputs.openStrings.current && this.inputs.pattern.current) {
+            this.inputs.openStrings.current && this.inputs.pattern.current && this.inputs.tuning.current) {
             this.props.onFretboardSettingsChanged({
                 firstFret: parseInt(this.inputs.firstFret.current.value),
                 lastFret: parseInt(this.inputs.lastFret.current.value),
@@ -226,6 +259,12 @@ export class Setup extends React.Component<Props> {
                 Note.fromName(this.inputs.root.current.value),
                 this.inputs.scale.current.value
             ));
+        }
+    }
+
+    private onTuningChanged() {
+        if (this.inputs.tuning.current) {
+            this.props.onTuningChanged(Tuning.fromString(this.inputs.tuning.current.value));
         }
     }
 
