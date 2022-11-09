@@ -1,39 +1,21 @@
-import {Note} from "./note";
-import {ScaleDegree} from "./scale-degree";
+import Note from "./Note";
+import ScaleDegree from "./ScaleDegree";
 
-const scales: { [index: string]: string[] } = {
-    'root-fifth': ['1', '5'],
-    'minor-pentatonic': ['1', 'b3', '4', '5', 'b7'],
-    'major-pentatonic': ['1', '2', '3', '5', '6'],
-    'minor-arpeggio': ['1', 'b3', '5'],
-    'major-arpeggio': ['1', '3', '5'],
-    'dominant-arpeggio': ['1', '3', '5', 'b7'],
-    'ionian': ['1', '2', '3', '4', '5', '6', '7'],
-    'dorian': ['1', '2', 'b3', '4', '5', '6', 'b7'],
-    'phrygian': ['1', 'b2', 'b3', '4', '5', 'b6', 'b7'],
-    'lydian': ['1', '2', '3', '#4', '5', '6', '7'],
-    'mixolydian': ['1', '2', '3', '4', '5', '6', 'b7'],
-    'aeolian': ['1', '2', 'b3', '4', '5', 'b6', 'b7'],
-    'locrian': ['1', 'b2', 'b3', '4', 'b5', 'b6', 'b7'],
-    'chromatic': ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'],
-};
+export default class Scale {
+    static fromString(root: string | Note, scaleString: string): Scale {
+        const rootNote = typeof(root) === 'string' ? Note.fromName(root) : root;
+        const degrees = scaleString.split('-').map(degreeName => ScaleDegree.fromName(degreeName));
+        return new Scale(rootNote, degrees);
+    }
 
-export class Scale {
     readonly root: Note;
-    readonly name: string;
     readonly notes: Note[];
     readonly degrees: ScaleDegree[];
 
-    constructor(root: Note, name: string) {
-        if (scales[name] === undefined) {
-            throw new TypeError("Invalid scale name!");
-        }
-
+    constructor(root: Note, degrees: ScaleDegree[]) {
         this.root = root;
-        this.name = name;
-
-        this.degrees = scales[name].map(degreeName => ScaleDegree.fromName(degreeName));
-        this.notes = this.degrees.map(degree => this.noteFromDegree(degree));
+        this.degrees = degrees;
+        this.notes = degrees.map(degree => this.noteFromDegree(degree));
     }
 
     containsNote(note: Note): boolean {
@@ -76,7 +58,7 @@ export class Scale {
     }
 
     noteFromValue(value: number): Note {
-        let scaleDegreeValue =  value - this.root.value;
+        let scaleDegreeValue = value - this.root.value;
 
         if (scaleDegreeValue < 0) {
             scaleDegreeValue += 12;

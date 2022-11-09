@@ -1,6 +1,9 @@
 import React from "react";
-
-import {FretboardContent, FretboardData, FretboardPosition} from "../model/fretboard-data";
+import Note from "../model/Note";
+import Position from "../model/Position";
+import Scale from "../model/Scale";
+import ScaleDegree from "../model/ScaleDegree";
+import Tuning from "../model/Tuning";
 
 const style = {
     maxFretSpacing: 120,
@@ -27,16 +30,21 @@ const style = {
 };
 
 export interface FretboardSettings {
+    tuning: Tuning,
     firstFret: number,
     lastFret: number,
     openStrings: boolean,
     labels: 'notes' | 'scale-degrees',
 }
 
+export interface FretboardContent {
+    scale: Scale,
+}
+
 type Props = {
     settings: FretboardSettings,
-    data: FretboardData,
-    onClick?: (position: FretboardPosition) => void,
+    content: FretboardContent,
+    onClick?: (position: Position) => void,
 }
 
 type State = {
@@ -45,7 +53,7 @@ type State = {
     lastVisibleFret: number,
 }
 
-export class Fretboard extends React.PureComponent<Props, State> {
+export default class Fretboard extends React.PureComponent<Props, State> {
     private readonly canvas = React.createRef<HTMLCanvasElement>();
     private readonly stringImage = new Image();
 
@@ -65,7 +73,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
     render() {
         const canvasStyle = {
             width: '100%',
-            height: style.stringSpacing * this.props.data.getStringCount() + style.topMargin,
+            height: style.stringSpacing * this.props.settings.tuning.stringCount + style.topMargin,
         };
 
         return (
@@ -150,19 +158,24 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
         this.drawFretboard(ctx);
 
-        for (let string = 0; string < this.props.data.getStringCount(); string++) {
-            if (this.props.settings.openStrings) {
-                this.drawPosition(ctx, {fret: 0, string});
-            }
-            for (let fret = this.state.firstVisibleFret; fret <= this.state.lastVisibleFret; fret++) {
-                this.drawPosition(ctx, {fret, string});
+        for (let string = 0; string < this.props.settings.tuning.stringCount; string++) {
+            for (let fret = this.props.settings.firstFret; fret <= this.props.settings.lastFret; fret++) {
+                const position = { string, fret };
+                const note = this.props.settings.tuning.getNote(position, this.props.content.scale);
+
+                if (!this.props.content.scale.containsNote(note)) {
+                    continue;
+                }
+
+                const degree = this.props.content.scale.degreeFromNote(note);
+                this.drawPosition(ctx, position, note, degree);
             }
         }
     }
 
     private drawFretboard(ctx: CanvasRenderingContext2D) {
         const fretboardWidth = (this.state.lastVisibleFret - this.state.firstVisibleFret + 1) * this.state.fretSpacing;
-        const fretboardHeight = style.stringSpacing * this.props.data.getStringCount();
+        const fretboardHeight = style.stringSpacing * this.props.settings.tuning.stringCount;
 
         // background
         ctx.fillStyle = 'bisque';
@@ -212,20 +225,14 @@ export class Fretboard extends React.PureComponent<Props, State> {
         ctx.fillStyle = ctx.createPattern(this.stringImage, 'repeat-x') as CanvasPattern;
         ctx.save();
         ctx.translate(0, style.stringSpacing / 2 - this.stringImage.height / 2);
-        for (let string = 0; string < this.props.data.getStringCount(); string++) {
+        for (let string = 0; string < this.props.settings.tuning.stringCount; string++) {
             ctx.fillRect(0, 0, fretboardWidth, this.stringImage.height);
             ctx.translate(0, style.stringSpacing);
         }
         ctx.restore();
     }
 
-    private drawPosition(ctx: CanvasRenderingContext2D, position: FretboardPosition) {
-        const content = this.props.data.getContent(position);
-
-        if (!content) {
-            return;
-        }
-
+    private drawPosition(ctx: CanvasRenderingContext2D, position: Position, note: Note, degree: ScaleDegree) {
         ctx.save();
 
         if (position.fret === 0) {
@@ -235,15 +242,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
             ctx.translate((visibleFretIndex + 0.5) * this.state.fretSpacing, (position.string + 0.5) * style.stringSpacing);
         }
 
-        if (content) {
-            this.drawContent(ctx, position, content);
-        }
-
-        ctx.restore();
-    }
-
-    private drawContent(ctx: CanvasRenderingContext2D, position: FretboardPosition, content: FretboardContent) {
-        ctx.fillStyle = style.scaleDegreeColors[content.degree.value];
+        ctx.fillStyle = style.scaleDegreeColors[degree.value];
 
         if (position.fret === 0) {
             fillCircle(ctx, 0, 0, style.openNoteSize / 2);
@@ -256,12 +255,14 @@ export class Fretboard extends React.PureComponent<Props, State> {
         ctx.textAlign = 'center';
 
         if (this.props.settings.labels === "notes") {
-            ctx.fillText(content.note.name, 0, 8);
+            ctx.fillText(note.name, 0, 8);
         }
 
         if (this.props.settings.labels === "scale-degrees") {
-            ctx.fillText(content.degree.name, 0, 8);
+            ctx.fillText(degree.name, 0, 8);
         }
+
+        ctx.restore();
     }
 
     private onClick(x: number, y: number) {
@@ -281,7 +282,7 @@ export class Fretboard extends React.PureComponent<Props, State> {
 
         const string = Math.floor(y / style.stringSpacing);
 
-        if (string < 0 || string >= this.props.data.getStringCount()) {
+        if (string < 0 || string >= this.props.settings.tuning.stringCount) {
             return;
         }
 

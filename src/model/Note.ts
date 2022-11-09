@@ -1,4 +1,4 @@
-export class Note {
+export default class Note {
     static fromName(name: string): Note {
         return new Note(name);
     }

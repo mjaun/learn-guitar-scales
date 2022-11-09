@@ -1,4 +1,4 @@
-export class ScaleDegree {
+export default class ScaleDegree {
     static fromName(name: string): ScaleDegree {
         return new ScaleDegree(name);
     }

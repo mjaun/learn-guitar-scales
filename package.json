@@ -1,23 +1,34 @@
 {
-  "name": "learn-guitar-scales",
-  "scripts": {
-    "dev": "parcel src/index.html",
-    "build": "parcel build --public-url /learn-scales/ src/index.html"
-  },
+  "name": "create-react-app-with-typescript",
+  "version": "5.0.0",
+  "private": true,
   "dependencies": {
-    "bootstrap": "^4.5.0",
-    "jquery": "^3.5.1",
-    "popper.js": "^1.16.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "tslib": "^1.13.0"
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
+    "@mui/material": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "typescript": "latest"
   },
-  "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.14.0",
-    "@types/jquery": "^3.5.1",
-    "@types/react": "^16.9.44",
-    "@types/react-dom": "^16.9.8",
-    "parcel-bundler": "^1.12.4",
-    "typescript": "^3.9.7"
+  "scripts": {
+    "start": "WATCHPACK_POLLING=true react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
