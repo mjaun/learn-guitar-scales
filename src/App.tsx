@@ -4,10 +4,11 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import ProTip from './ProTip';
-import Fretboard, {FretboardSettings, FretboardContent} from './components/Fretboard'
 import Tuning from './model/Tuning';
 import Scale from './model/Scale';
 import Note from './model/Note';
+import Fretboard, {FretboardSettings, FretboardContent} from './components/Fretboard'
+import FretboardForm from './components/FretboardForm'
 
 function Copyright() {
     return (
@@ -25,13 +26,13 @@ export default function App() {
     const tuning = Tuning.fromString('E-A-D-G-B-E');
     const scale = Scale.fromString('A', '1-b3-4-5-b7');
 
-    const settings: FretboardSettings = {
+    const [fretboardSettings, setFretboardSettings] = React.useState<FretboardSettings>({
         tuning,
         firstFret: 5,
         lastFret: 8,
         openStrings: false,
         labels: 'scale-degrees',
-    }
+    });
 
     const content: FretboardContent = {
         scale,
@@ -44,7 +45,11 @@ export default function App() {
                     Create React App example with TypeScript
                 </Typography>
                 <ProTip/>
-                <Fretboard settings={settings} content={content} />
+                <Fretboard settings={fretboardSettings} content={content}/>
+                <FretboardForm
+                    settings={fretboardSettings}
+                    onSettingsChange={(settings) => setFretboardSettings(settings)}
+                />
                 <Copyright/>
             </Box>
         </Container>
