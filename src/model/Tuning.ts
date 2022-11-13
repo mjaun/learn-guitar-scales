@@ -1,10 +1,8 @@
 import Note from "./Note";
-import Position from "./Position"
-import Scale from "./Scale";
 
 export default class Tuning {
-    static fromString(tuningString: string): Tuning {
-        return new Tuning(tuningString.split('-').map(noteName => Note.fromName(noteName)).reverse());
+    static fromId(id: string): Tuning {
+        return new Tuning(id.split('-').map(noteId => Note.fromId(noteId)).reverse());
     }
 
     readonly notes: Note[];
@@ -13,16 +11,11 @@ export default class Tuning {
         this.notes = notes;
     }
 
+    get id(): string {
+        return this.notes.map(note => note.id).reverse().join('-');
+    }
+
     get stringCount(): number {
         return this.notes.length;
-    }
-
-    getNote(position: Position, scale: Scale) {
-        const value = (this.notes[position.string].value + position.fret) % 12;
-        return scale.noteFromValue(value);
-    }
-
-    toString(): string {
-        return this.notes.map(note => note.name).reverse().join('-');
     }
 }

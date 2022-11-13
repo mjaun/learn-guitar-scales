@@ -1,50 +1,49 @@
+import {limitValue} from "./Util";
+
 export default class Note {
-    static fromName(name: string): Note {
-        return new Note(name);
+    static fromId(id: string): Note {
+        return new Note(id);
     }
 
-    private static isNameValid(name: string): boolean {
-        if (name.length < 1) {
+    private static isIdValid(id: string): boolean {
+        if (id.length < 1) {
             return false;
         }
 
         const noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
         const noteModifiers = ['', 'b', 'bb', '#', '##'];
 
-        return noteNames.includes(name.charAt(0)) &&
-               noteModifiers.includes(name.substring(1));
+        return noteNames.includes(id.charAt(0)) &&
+               noteModifiers.includes(id.substring(1));
     }
 
-    readonly name: string;
+    readonly id: string;
 
-    private constructor(name: string) {
-        if (!Note.isNameValid(name)) {
-            throw new TypeError('Invalid note name!');
+    private constructor(id: string) {
+        if (!Note.isIdValid(id)) {
+            throw new RangeError('Invalid note ID!');
         }
 
-        this.name = name;
+        this.id = id;
     }
 
     get value(): number {
         const noteValues: { [index: string]: number } = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11};
         const noteModifiers: { [index: string]: number } = {'': 0, 'b': -1, 'bb': -2, '#': 1, '##': 2};
 
-        const noteValue = noteValues[this.name.charAt(0)];
-        const noteModifier = noteModifiers[this.name.substring(1)];
+        const noteValue = noteValues[this.id.charAt(0)];
+        const noteModifier = noteModifiers[this.id.substring(1)];
 
-        let totalValue = noteValue + noteModifier;
-
-        if (totalValue < 0) {
-            totalValue += 12;
-        }
-
-        return totalValue;
+        return limitValue(noteValue + noteModifier);
     }
 
     get text(): string {
-        return this.name
+        return this.id
             .replace('b', '\u266D')
             .replace('#', '\u266F');
     }
 
+    get naturalNote(): Note {
+        return Note.fromId(this.id.charAt(0));
+    }
 }
