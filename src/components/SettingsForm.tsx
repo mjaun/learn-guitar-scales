@@ -4,12 +4,23 @@ import {Box, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Sele
 import * as React from "react";
 import Note from "../model/Note";
 
+const tunings: {id: string, text: string}[] = [
+    { id: 'E-A-D-G-B-E', text: 'E Standard' },
+    { id: 'Eb-Ab-Db-Gb-Bb-Eb', text: Note.fromName('Eb').text + ' Standard'},
+    { id: 'D-G-C-F-A-D', text: 'D Standard' },
+    { id: 'C-F-Bb-Eb-G-C', text: 'C Standard' },
+    { id: 'B-E-A-D-F#-B', text: 'B Standard' },
+    { id: 'D-A-D-G-B-E', text: 'Dropped D' },
+    { id: 'C-G-C-F-A-D', text: 'Dropped C' },
+    { id: 'B-F#-B-E-G#-C#', text: 'Dropped B' },
+]
+
 type Props = {
     settings: FretboardSettings,
     onSettingsChange: (settings: FretboardSettings) => void,
 }
 
-export default function FretboardForm(props: Props) {
+export default function SettingsForm(props: Props) {
     function updateSettings(settings: Partial<FretboardSettings>) {
         props.onSettingsChange({...props.settings, ...settings});
     }
@@ -30,14 +41,7 @@ export default function FretboardForm(props: Props) {
                 value={props.settings.tuning.toString()}
                 onChange={(event) => updateSettings({tuning: Tuning.fromString(event.target.value as string)})}
             >
-                <MenuItem value="E-A-D-G-B-E">E Standard</MenuItem>
-                <MenuItem value="Eb-Ab-Db-Gb-Bb-Eb">{Note.fromName('Eb').text} Standard</MenuItem>
-                <MenuItem value="D-G-C-F-A-D">D Standard</MenuItem>
-                <MenuItem value="C-F-Bb-Eb-G-C">C Standard</MenuItem>
-                <MenuItem value="B-E-A-D-F#-B">B Standard</MenuItem>
-                <MenuItem value="D-A-D-G-B-E">Dropped D</MenuItem>
-                <MenuItem value="C-G-C-F-A-D">Dropped C</MenuItem>
-                <MenuItem value="B-F#-B-E-G#-C#">Dropped B</MenuItem>
+                {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
             </Select>
         </FormControl>
     );

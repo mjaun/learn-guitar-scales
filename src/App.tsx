@@ -8,7 +8,8 @@ import Tuning from './model/Tuning';
 import Scale from './model/Scale';
 import Note from './model/Note';
 import Fretboard, {FretboardSettings, FretboardContent} from './components/Fretboard'
-import FretboardForm from './components/FretboardForm'
+import SettingsForm from './components/SettingsForm'
+import ContentForm from './components/ContentForm'
 
 function Copyright() {
     return (
@@ -23,20 +24,17 @@ function Copyright() {
 }
 
 export default function App() {
-    const tuning = Tuning.fromString('E-A-D-G-B-E');
-    const scale = Scale.fromString('A', '1-b3-4-5-b7');
-
-    const [fretboardSettings, setFretboardSettings] = React.useState<FretboardSettings>({
-        tuning,
+    const [settings, setSettings] = React.useState<FretboardSettings>({
+        tuning: Tuning.fromString('E-A-D-G-B-E'),
         firstFret: 5,
         lastFret: 8,
         openStrings: false,
         labels: 'scale-degrees',
     });
 
-    const content: FretboardContent = {
-        scale,
-    }
+    const [content, setContent] = React.useState<FretboardContent>({
+        scale: Scale.fromString('A', '1-b3-4-5-b7'),
+    });
 
     return (
         <Container maxWidth="sm">
@@ -45,10 +43,14 @@ export default function App() {
                     Create React App example with TypeScript
                 </Typography>
                 <ProTip/>
-                <Fretboard settings={fretboardSettings} content={content}/>
-                <FretboardForm
-                    settings={fretboardSettings}
-                    onSettingsChange={(settings) => setFretboardSettings(settings)}
+                <Fretboard settings={settings} content={content}/>
+                <SettingsForm
+                    settings={settings}
+                    onSettingsChange={(settings) => setSettings(settings)}
+                />
+                <ContentForm
+                    content={content}
+                    onContentChange={(content) => setContent(content)}
                 />
                 <Copyright/>
             </Box>

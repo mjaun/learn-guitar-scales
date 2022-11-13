@@ -83,4 +83,8 @@ export default class Scale {
 
         return Note.fromName(naturalNoteName + noteModifier);
     }
+
+    toString(): string {
+        return this.degrees.map(degree => degree.name).join('-');
+    }
 }
