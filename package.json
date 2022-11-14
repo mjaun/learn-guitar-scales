@@ -1,6 +1,5 @@
 {
-  "name": "create-react-app-with-typescript",
-  "version": "5.0.0",
+  "name": "learn-guitar-scales",
   "private": true,
   "dependencies": {
     "@emotion/react": "latest",

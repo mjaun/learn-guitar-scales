@@ -2,26 +2,12 @@ import * as React from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import ProTip from './ProTip';
 import Tuning from './model/Tuning';
 import Scale from './model/Scale';
 import Note from './model/Note';
 import Fretboard, {FretboardSettings} from './components/Fretboard'
 import SettingsForm from './components/SettingsForm'
-import {ContextSettings} from "./model/Context";
-
-function Copyright() {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}.
-        </Typography>
-    );
-}
+import {ContextSettings} from './model/Context';
 
 export default function App() {
     const [fretboardSettings, setFretboardSettings] = React.useState<FretboardSettings>({
@@ -38,23 +24,25 @@ export default function App() {
     });
 
     return (
-        <Container maxWidth="sm">
-            <Box sx={{my: 4}}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Create React App example with TypeScript
+        <Container maxWidth="xl">
+            <Box marginY={4}>
+                <Typography variant="h2" component="h1" gutterBottom>
+                    Learn Guitar Scales
                 </Typography>
-                <ProTip/>
-                <Fretboard
-                    contextSettings={contextSettings}
-                    fretboardSettings={fretboardSettings}
-                />
+            </Box>
+            <Box marginY={2}>
                 <SettingsForm
                     contextSettings={contextSettings}
                     onContextSettingsChange={(settings) => setContextSettings(settings)}
                     fretboardSettings={fretboardSettings}
                     onFretboardSettingsChange={(settings) => setFretboardSettings(settings)}
                 />
-                <Copyright/>
+            </Box>
+            <Box>
+                <Fretboard
+                    contextSettings={contextSettings}
+                    fretboardSettings={fretboardSettings}
+                />
             </Box>
         </Container>
     );

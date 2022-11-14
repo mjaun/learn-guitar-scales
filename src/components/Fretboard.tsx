@@ -5,7 +5,7 @@ import ScaleDegree from "../model/ScaleDegree";
 import Context, {ContextSettings} from "../model/Context";
 
 const style = {
-    maxFretSpacing: 120,
+    maxFretSpacing: 125,
     stringSpacing: 55,
     markerSize: 30,
     noteSize: 40,
@@ -48,6 +48,10 @@ type Props = {
 }
 
 export default function Fretboard(props: Props) {
+    const fretboardSettings = props.fretboardSettings;
+
+    const context = new Context(props.contextSettings);
+
     const canvas = React.useRef<null | HTMLCanvasElement>(null);
 
     const [stringImage, setStringImage] = React.useState(new Image());
@@ -65,11 +69,14 @@ export default function Fretboard(props: Props) {
     }, []);
 
     React.useEffect(() => {
-        updateDimensions();
         const listener = () => updateDimensions();
         window.addEventListener('resize', listener);
         return () => window.removeEventListener('resize', listener);
     }, []);
+
+    React.useEffect(() => {
+        updateDimensions();
+    }, [fretboardSettings]);
 
     React.useEffect(() => {
         drawCanvas();
@@ -81,11 +88,11 @@ export default function Fretboard(props: Props) {
         }
 
         let containerWidth = canvas.current.clientWidth;
-        if (props.fretboardSettings.openStrings) {
+        if (fretboardSettings.openStrings) {
             containerWidth -= style.openNoteSize;
         }
 
-        const fretCount = props.fretboardSettings.lastFret - props.fretboardSettings.firstFret + 1;
+        const fretCount = fretboardSettings.lastFret - fretboardSettings.firstFret + 1;
         let fretSpacing = (containerWidth - style.fretWidth) / fretCount;
         let additionalFrets = 0;
 
@@ -94,8 +101,8 @@ export default function Fretboard(props: Props) {
             fretSpacing = (containerWidth - style.fretWidth) / (fretCount + additionalFrets);
         }
 
-        let firstVisibleFret = props.fretboardSettings.firstFret - Math.floor(additionalFrets / 2);
-        let lastVisibleFret = props.fretboardSettings.lastFret + Math.ceil(additionalFrets / 2);
+        let firstVisibleFret = fretboardSettings.firstFret - Math.floor(additionalFrets / 2);
+        let lastVisibleFret = fretboardSettings.lastFret + Math.ceil(additionalFrets / 2);
 
         while (firstVisibleFret < 1) {
             firstVisibleFret++;
@@ -123,7 +130,7 @@ export default function Fretboard(props: Props) {
         ctx.canvas.width = ctx.canvas.clientWidth;
         ctx.canvas.height = ctx.canvas.clientHeight;
 
-        if (props.fretboardSettings.openStrings) {
+        if (fretboardSettings.openStrings) {
             ctx.translate(style.openNoteSize, style.topMargin);
         } else {
             ctx.translate(0, style.topMargin);
@@ -131,26 +138,21 @@ export default function Fretboard(props: Props) {
 
         drawFretboard(ctx);
 
-        const context = new Context(props.contextSettings);
+        for (const position of getAllPositions()) {
+            const note = context.getNoteByPosition(position);
+            const scaleDegree = context.getScaleDegreeByPosition(position);
 
-        for (let string = 0; string < context.tuning.stringCount; string++) {
-            for (let fret = props.fretboardSettings.firstFret; fret <= props.fretboardSettings.lastFret; fret++) {
-                const position = {string, fret};
-                const note = context.getNoteByPosition(position);
-                const scaleDegree = context.getScaleDegreeByPosition(position);
-
-                if (!context.isNoteInScale(note)) {
-                    continue;
-                }
-
-                drawPosition(ctx, position, note, scaleDegree);
+            if (!context.isNoteInScale(note)) {
+                continue;
             }
+
+            drawPosition(ctx, position, note, scaleDegree);
         }
     }
 
     function drawFretboard(ctx: CanvasRenderingContext2D) {
         const fretboardWidth = (layout.lastVisibleFret - layout.firstVisibleFret + 1) * layout.fretSpacing;
-        const fretboardHeight = style.stringSpacing * props.contextSettings.tuning.stringCount;
+        const fretboardHeight = style.stringSpacing * context.tuning.stringCount;
 
         // background
         ctx.fillStyle = 'bisque';
@@ -158,14 +160,7 @@ export default function Fretboard(props: Props) {
 
         // frets
         for (let i = 0; i <= layout.lastVisibleFret - layout.firstVisibleFret + 1; i++) {
-            const fret = layout.firstVisibleFret + i;
-
-            if (fret === props.fretboardSettings.firstFret || fret === props.fretboardSettings.lastFret + 1) {
-                ctx.fillStyle = 'black';
-            } else {
-                ctx.fillStyle = 'gray';
-            }
-
+            ctx.fillStyle = 'gray';
             ctx.fillRect(i * layout.fretSpacing, 0, 4, fretboardHeight);
         }
 
@@ -200,7 +195,7 @@ export default function Fretboard(props: Props) {
         ctx.fillStyle = ctx.createPattern(stringImage, 'repeat-x') as CanvasPattern;
         ctx.save();
         ctx.translate(0, style.stringSpacing / 2 - stringImage.height / 2);
-        for (let string = 0; string < props.contextSettings.tuning.stringCount; string++) {
+        for (let string = 0; string < context.tuning.stringCount; string++) {
             ctx.fillRect(0, 0, fretboardWidth, stringImage.height);
             ctx.translate(0, style.stringSpacing);
         }
@@ -229,11 +224,11 @@ export default function Fretboard(props: Props) {
         ctx.font = 'bold 24px Segoe UI';
         ctx.textAlign = 'center';
 
-        if (props.fretboardSettings.labels === 'notes') {
+        if (fretboardSettings.labels === 'notes') {
             ctx.fillText(note.id, 0, 8);
         }
 
-        if (props.fretboardSettings.labels === 'scale-degrees') {
+        if (fretboardSettings.labels === 'scale-degrees') {
             ctx.fillText(scaleDegree.id, 0, 8);
         }
 
@@ -255,26 +250,41 @@ export default function Fretboard(props: Props) {
 
         y -= style.topMargin;
 
-        if (props.fretboardSettings.openStrings) {
+        if (fretboardSettings.openStrings) {
             x -= style.openNoteSize;
         }
 
         const string = Math.floor(y / style.stringSpacing);
 
-        if (string < 0 || string >= props.contextSettings.tuning.stringCount) {
+        if (string < 0 || string >= context.tuning.stringCount) {
             return;
         }
 
         const fretIndex = Math.floor(x / layout.fretSpacing);
-        const openStringClicked = fretIndex < 0 && props.fretboardSettings.openStrings;
+        const openStringClicked = fretIndex < 0 && fretboardSettings.openStrings;
         const fret = openStringClicked ? 0 : layout.firstVisibleFret + fretIndex;
 
         props.onClick({fret, string});
     }
 
+    function getAllPositions(): Position[] {
+        const result: Position[] = [];
+
+        for (let string = 0; string < context.tuning.stringCount; string++) {
+            if (fretboardSettings.openStrings) {
+                result.push({string, fret: 0});
+            }
+            for (let fret = fretboardSettings.firstFret; fret <= fretboardSettings.lastFret; fret++) {
+                result.push({string, fret});
+            }
+        }
+
+        return result;
+    }
+
     const canvasStyle = {
         width: '100%',
-        height: style.stringSpacing * props.contextSettings.tuning.stringCount + style.topMargin,
+        height: style.stringSpacing * context.tuning.stringCount + style.topMargin,
     };
 
     return (

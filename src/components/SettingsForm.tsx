@@ -1,17 +1,22 @@
-import {Box, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select} from "@mui/material";
+import {Grid, MenuItem} from "@mui/material";
 import * as React from "react";
+import SelectControl from './SelectControl'
 import {ContextSettings} from "../model/Context";
 import {FretboardSettings} from "./Fretboard";
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
+import CheckboxControl from "./CheckboxControl";
 
 const rootNotes = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'];
 
 const scales: { id: string, text: string }[] = [
-    {id: '1-5', text: 'Root + Fifths'},
+    {id: '1', text: 'Root'},
+    {id: '1-5', text: 'Root + Fifth'},
     {id: '1-3-5', text: 'Major Arpeggio'},
     {id: '1-b3-5', text: 'Minor Arpeggio'},
+    {id: '1-3-5-7', text: 'Major7 Arpeggio'},
+    {id: '1-b3-5-b7', text: 'Minor7 Arpeggio'},
     {id: '1-3-5-b7', text: 'Dominant Arpeggio'},
     {id: '1-2-3-5-6', text: 'Major Pentatonic'},
     {id: '1-b3-4-5-b7', text: 'Minor Pentatonic'},
@@ -25,15 +30,15 @@ const scales: { id: string, text: string }[] = [
     {id: '1-b2-2-b3-3-4-b5-5-b6-6-b7-7', text: 'Chromatic'},
 ];
 
-const tunings: {id: string, text: string}[] = [
-    { id: 'E-A-D-G-B-E', text: 'E Standard' },
-    { id: 'Eb-Ab-Db-Gb-Bb-Eb', text: Note.fromId('Eb').text + ' Standard'},
-    { id: 'D-G-C-F-A-D', text: 'D Standard' },
-    { id: 'C-F-Bb-Eb-G-C', text: 'C Standard' },
-    { id: 'B-E-A-D-F#-B', text: 'B Standard' },
-    { id: 'D-A-D-G-B-E', text: 'Dropped D' },
-    { id: 'C-G-C-F-A-D', text: 'Dropped C' },
-    { id: 'B-F#-B-E-G#-C#', text: 'Dropped B' },
+const tunings: { id: string, text: string }[] = [
+    {id: 'E-A-D-G-B-E', text: 'E Standard'},
+    {id: 'Eb-Ab-Db-Gb-Bb-Eb', text: Note.fromId('Eb').text + ' Standard'},
+    {id: 'D-G-C-F-A-D', text: 'D Standard'},
+    {id: 'C-F-Bb-Eb-G-C', text: 'C Standard'},
+    {id: 'B-E-A-D-F#-B', text: 'B Standard'},
+    {id: 'D-A-D-G-B-E', text: 'Dropped D'},
+    {id: 'C-G-C-F-A-D', text: 'Dropped C'},
+    {id: 'B-F#-B-E-G#-C#', text: 'Dropped B'},
 ]
 
 type Props = {
@@ -59,85 +64,94 @@ export default function SettingsForm(props: Props) {
     }
 
     return (
-        <Box>
-            <FormControl>
-                <InputLabel id="select-tuning-label">Tuning</InputLabel>
-                <Select
-                    labelId="select-tuning-label"
-                    id="select-tuning"
-                    label="Tuning"
-                    value={props.contextSettings.tuning.id}
-                    onChange={(event) => updateContext({tuning: Tuning.fromId(event.target.value as string)})}
-                >
-                    {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
-                </Select>
-            </FormControl>
-
-            <FormControl>
-                <InputLabel id="select-first-fret-label">First Fret</InputLabel>
-                <Select
-                    labelId="select-first-fret-label"
-                    id="select-first-fret"
-                    label="First Fret"
-                    value={props.fretboardSettings.firstFret}
-                    onChange={(event) => updateFretboard({firstFret: event.target.value as number})}
-                >
-                    {selectFretItems}
-                </Select>
-            </FormControl>
-
-            <FormControl>
-                <InputLabel id="select-last-fret-label">Last Fret</InputLabel>
-                <Select
-                    labelId="select-last-fret-label"
-                    id="select-last-fret"
-                    label="Last Fret"
-                    value={props.fretboardSettings.lastFret}
-                    onChange={(event) => updateFretboard({lastFret: event.target.value as number})}
-                >
-                    {selectFretItems}
-                </Select>
-            </FormControl>
-
-            <FormControlLabel label="Open Strings" control={
-                <Checkbox
-                    checked={props.fretboardSettings.openStrings}
-                    onChange={(event) => updateFretboard({openStrings: event.target.checked})}
-                />
-            }/>
-
-            <FormControlLabel label="Show Scale Degrees" control={
-                <Checkbox
-                    checked={props.fretboardSettings.labels === 'scale-degrees'}
-                    onChange={(event) => updateFretboard({labels: event.target.checked ? 'scale-degrees' : 'notes'})}
-                />
-            }/>
-
-            <FormControl>
-                <InputLabel id="select-root-label">Root</InputLabel>
-                <Select
-                    labelId="select-root-label"
+        <Grid container alignItems="center" spacing={2}>
+            <Grid item xs="auto">
+                <SelectControl
                     id="select-root"
                     label="Root"
+                    width={80}
                     value={props.contextSettings.root.id}
-                    onChange={(event) => updateContext({root: Note.fromId(event.target.value as string)})}
+                    onChange={value => updateContext({root: Note.fromId(value)})}
                 >
                     {rootNotes.map(name => <MenuItem key={name} value={name}>{Note.fromId(name).text}</MenuItem>)}
-                </Select>
-            </FormControl>
+                </SelectControl>
+            </Grid>
 
-            <FormControl>
-                <InputLabel id="select-scale-label">Scale</InputLabel>
-                <Select
-                    labelId="select-scale-label"
+            <Grid item xs="auto">
+                <SelectControl
                     id="select-scale"
                     label="Scale"
+                    width={200}
                     value={props.contextSettings.scale.id}
-                    onChange={(event) => updateContext({scale: Scale.fromId(event.target.value as string)})}
+                    onChange={value => updateContext({scale: Scale.fromId(value)})}
                 >
                     {scales.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
-                </Select>
-            </FormControl>
-        </Box>
+                </SelectControl>
+            </Grid>
+
+            <Grid item xs="auto">
+                <SelectControl
+                    id="select-tuning"
+                    label="Tuning"
+                    width={150}
+                    value={props.contextSettings.tuning.id}
+                    onChange={value => updateContext({tuning: Tuning.fromId(value)})}
+                >
+                    {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
+                </SelectControl>
+            </Grid>
+
+            <Grid item xs="auto">
+                <SelectControl
+                    id="select-first-fret"
+                    label="First Fret"
+                    width={80}
+                    value={props.fretboardSettings.firstFret.toString()}
+                    onChange={value => updateFretboard({
+                        firstFret: parseInt(value),
+                        lastFret: Math.max(parseInt(value), props.fretboardSettings.lastFret),
+                    })}
+                >
+                    {selectFretItems}
+                </SelectControl>
+            </Grid>
+
+            <Grid item xs="auto">
+                <SelectControl
+                    id="select-last-fret"
+                    label="Last Fret"
+                    width={80}
+                    value={props.fretboardSettings.lastFret.toString()}
+                    onChange={value => updateFretboard({
+                        firstFret: Math.min(parseInt(value), props.fretboardSettings.firstFret),
+                        lastFret: parseInt(value)
+                    })}
+                >
+                    {selectFretItems}
+                </SelectControl>
+            </Grid>
+
+            <Grid item xs="auto">
+                <SelectControl
+                    id="select-labels"
+                    label="Labels"
+                    width={160}
+                    value={props.fretboardSettings.labels}
+                    onChange={value => updateFretboard({labels: value as 'scale-degrees' | 'notes'})}
+                >
+                    <MenuItem value="scale-degrees">Scale Degrees</MenuItem>
+                    <MenuItem value="notes">Notes</MenuItem>
+                </SelectControl>
+            </Grid>
+
+            <Grid item xs="auto">
+                <CheckboxControl
+                    id="check-open-strings"
+                    label="Open Strings"
+                    checked={props.fretboardSettings.openStrings}
+                    onChange={checked => updateFretboard({openStrings: checked})}
+                />
+            </Grid>
+        </Grid>
     );
 }
