@@ -1,4 +1,4 @@
-import {limitValue} from "./Util";
+import {formatFlatSharp, limitValue} from "./Util";
 
 export default class ScaleDegree {
     static fromId(id: string): ScaleDegree {
@@ -55,15 +55,6 @@ export default class ScaleDegree {
     }
 
     get text(): string {
-        if (this.id == '1') {
-            return 'root';
-        }
-        const suffixes: { [index: string]: string } = {
-            '2': 'nd', '3': 'rd', '4': 'th', '5': 'th', '6': 'th', '7': 'th'
-        };
-        let text = this.id
-            .replace('b', '\u266D')
-            .replace('#', '\u266F');
-        return text + suffixes[this.id.charAt(this.id.length - 1)];
+        return formatFlatSharp(this.id);
     }
 }

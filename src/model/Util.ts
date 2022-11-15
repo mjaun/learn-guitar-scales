@@ -7,3 +7,11 @@ export function limitValue(value: number): number {
         return value;
     }
 }
+
+export function formatFlatSharp(value: string): string {
+    return value
+        .replace('bb', '\u{1D12B}')
+        .replace('##', '\u{1D12A}')
+        .replace('b', '\u{266D}')
+        .replace('#', '\u{266F}');
+}

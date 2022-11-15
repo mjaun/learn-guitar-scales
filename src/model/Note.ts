@@ -1,4 +1,4 @@
-import {limitValue} from "./Util";
+import {formatFlatSharp, limitValue} from "./Util";
 
 export default class Note {
     static fromId(id: string): Note {
@@ -38,9 +38,7 @@ export default class Note {
     }
 
     get text(): string {
-        return this.id
-            .replace('b', '\u266D')
-            .replace('#', '\u266F');
+        return formatFlatSharp(this.id);
     }
 
     get naturalNote(): Note {
