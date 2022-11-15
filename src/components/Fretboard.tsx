@@ -2,7 +2,6 @@ import React from "react";
 import Note from "../model/Note";
 import Position from "../model/Position";
 import ScaleDegree from "../model/ScaleDegree";
-import Context, {ContextSettings} from "../model/Context";
 
 const style = {
     maxFretSpacing: 125,
@@ -28,9 +27,17 @@ const style = {
     ],
 };
 
+export interface FretboardData {
+    position: Position,
+    scaleDegree: ScaleDegree,
+    note: Note,
+    visibility: 'full' | 'outlined',
+}
+
 export interface FretboardSettings {
     firstFret: number,
     lastFret: number,
+    stringCount: number,
     openStrings: boolean,
     labels: 'notes' | 'scale-degrees',
 }
@@ -42,16 +49,12 @@ interface Layout {
 }
 
 type Props = {
-    contextSettings: ContextSettings,
-    fretboardSettings: FretboardSettings,
+    data: FretboardData[],
+    settings: FretboardSettings,
     onClick?: (position: Position) => void,
 }
 
 export default function Fretboard(props: Props) {
-    const fretboardSettings = props.fretboardSettings;
-
-    const context = new Context(props.contextSettings);
-
     const canvas = React.useRef<null | HTMLCanvasElement>(null);
 
     const [stringImage, setStringImage] = React.useState(new Image());
@@ -76,7 +79,7 @@ export default function Fretboard(props: Props) {
 
     React.useEffect(() => {
         updateDimensions();
-    }, [fretboardSettings]);
+    }, [props.settings]);
 
     React.useEffect(() => {
         drawCanvas();
@@ -88,11 +91,11 @@ export default function Fretboard(props: Props) {
         }
 
         let containerWidth = canvas.current.clientWidth;
-        if (fretboardSettings.openStrings) {
+        if (props.settings.openStrings) {
             containerWidth -= style.openNoteSize;
         }
 
-        const fretCount = fretboardSettings.lastFret - fretboardSettings.firstFret + 1;
+        const fretCount = props.settings.lastFret - props.settings.firstFret + 1;
         let fretSpacing = (containerWidth - style.fretWidth) / fretCount;
         let additionalFrets = 0;
 
@@ -101,8 +104,8 @@ export default function Fretboard(props: Props) {
             fretSpacing = (containerWidth - style.fretWidth) / (fretCount + additionalFrets);
         }
 
-        let firstVisibleFret = fretboardSettings.firstFret - Math.floor(additionalFrets / 2);
-        let lastVisibleFret = fretboardSettings.lastFret + Math.ceil(additionalFrets / 2);
+        let firstVisibleFret = props.settings.firstFret - Math.floor(additionalFrets / 2);
+        let lastVisibleFret = props.settings.lastFret + Math.ceil(additionalFrets / 2);
 
         while (firstVisibleFret < 1) {
             firstVisibleFret++;
@@ -130,7 +133,7 @@ export default function Fretboard(props: Props) {
         ctx.canvas.width = ctx.canvas.clientWidth;
         ctx.canvas.height = ctx.canvas.clientHeight;
 
-        if (fretboardSettings.openStrings) {
+        if (props.settings.openStrings) {
             ctx.translate(style.openNoteSize, style.topMargin);
         } else {
             ctx.translate(0, style.topMargin);
@@ -138,21 +141,27 @@ export default function Fretboard(props: Props) {
 
         drawFretboard(ctx);
 
-        for (const position of getAllPositions()) {
-            const note = context.getNoteByPosition(position);
-            const scaleDegree = context.getScaleDegreeByPosition(position);
-
-            if (!context.isNoteInScale(note)) {
+        for (const data of props.data) {
+            if (data.position.fret === 0 && !props.settings.openStrings) {
+                continue;
+            }
+            if (data.position.string >= props.settings.stringCount) {
+                continue;
+            }
+            if (data.position.fret !== 0 && data.position.fret < layout.firstVisibleFret) {
+                continue;
+            }
+            if (data.position.fret > layout.lastVisibleFret) {
                 continue;
             }
 
-            drawPosition(ctx, position, note, scaleDegree);
+            drawPosition(ctx, data);
         }
     }
 
     function drawFretboard(ctx: CanvasRenderingContext2D) {
         const fretboardWidth = (layout.lastVisibleFret - layout.firstVisibleFret + 1) * layout.fretSpacing;
-        const fretboardHeight = style.stringSpacing * context.tuning.stringCount;
+        const fretboardHeight = style.stringSpacing * props.settings.stringCount;
 
         // background
         ctx.fillStyle = 'bisque';
@@ -171,15 +180,13 @@ export default function Fretboard(props: Props) {
             let x = (i + 0.5) * layout.fretSpacing;
 
             if ([3, 5, 7, 9].includes(fret % 12)) {
-                ctx.fillStyle = 'gray';
-                fillCircle(ctx, x, fretboardHeight / 2, style.markerSize / 2);
+                fillCircle(ctx, x, fretboardHeight / 2, style.markerSize / 2, 'gray');
                 drawMarkerText = true;
             }
 
             if (fret % 12 == 0) {
-                ctx.fillStyle = 'gray';
-                fillCircle(ctx, x, fretboardHeight / 3, style.markerSize / 2);
-                fillCircle(ctx, x, fretboardHeight / 3 * 2, style.markerSize / 2);
+                fillCircle(ctx, x, fretboardHeight / 3, style.markerSize / 2, 'gray');
+                fillCircle(ctx, x, fretboardHeight / 3 * 2, style.markerSize / 2, 'gray');
                 drawMarkerText = true;
             }
 
@@ -195,41 +202,52 @@ export default function Fretboard(props: Props) {
         ctx.fillStyle = ctx.createPattern(stringImage, 'repeat-x') as CanvasPattern;
         ctx.save();
         ctx.translate(0, style.stringSpacing / 2 - stringImage.height / 2);
-        for (let string = 0; string < context.tuning.stringCount; string++) {
+        for (let string = 0; string < props.settings.stringCount; string++) {
             ctx.fillRect(0, 0, fretboardWidth, stringImage.height);
             ctx.translate(0, style.stringSpacing);
         }
         ctx.restore();
     }
 
-    function drawPosition(ctx: CanvasRenderingContext2D, position: Position, note: Note, scaleDegree: ScaleDegree) {
+    function drawPosition(ctx: CanvasRenderingContext2D, data: FretboardData) {
         ctx.save();
 
-        if (position.fret === 0) {
-            ctx.translate(-0.5 * style.openNoteSize + 2, (position.string + 0.5) * style.stringSpacing);
+        if (data.position.fret === 0) {
+            ctx.translate(-0.5 * style.openNoteSize + 2, (data.position.string + 0.5) * style.stringSpacing);
         } else {
-            const visibleFretIndex = position.fret - layout.firstVisibleFret;
-            ctx.translate((visibleFretIndex + 0.5) * layout.fretSpacing, (position.string + 0.5) * style.stringSpacing);
+            const visibleFretIndex = data.position.fret - layout.firstVisibleFret;
+            ctx.translate((visibleFretIndex + 0.5) * layout.fretSpacing, (data.position.string + 0.5) * style.stringSpacing);
         }
 
-        ctx.fillStyle = style.scaleDegreeColors[scaleDegree.value];
+        let radius: number;
 
-        if (position.fret === 0) {
-            fillCircle(ctx, 0, 0, style.openNoteSize / 2);
+        if (data.position.fret === 0) {
+            radius = style.openNoteSize / 2;
         } else {
-            fillCircle(ctx, 0, 0, style.noteSize / 2);
+            radius = style.noteSize / 2;
         }
 
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px Segoe UI';
-        ctx.textAlign = 'center';
-
-        if (fretboardSettings.labels === 'notes') {
-            ctx.fillText(note.id, 0, 8);
+        if (data.visibility === 'full') {
+            fillCircle(ctx, 0, 0, radius, style.scaleDegreeColors[data.scaleDegree.value]);
+        }
+        if (data.visibility === 'outlined') {
+            strokeCircle(ctx, 0, 0, radius, style.scaleDegreeColors[data.scaleDegree.value]);
         }
 
-        if (fretboardSettings.labels === 'scale-degrees') {
-            ctx.fillText(scaleDegree.id, 0, 8);
+        if (data.visibility !== 'outlined') {
+            let text = '';
+
+            if (props.settings.labels === 'notes') {
+                text = data.note.text;
+            }
+            if (props.settings.labels === 'scale-degrees') {
+                text = data.scaleDegree.text;
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 0, 8);
         }
 
         ctx.restore();
@@ -250,41 +268,26 @@ export default function Fretboard(props: Props) {
 
         y -= style.topMargin;
 
-        if (fretboardSettings.openStrings) {
+        if (props.settings.openStrings) {
             x -= style.openNoteSize;
         }
 
         const string = Math.floor(y / style.stringSpacing);
 
-        if (string < 0 || string >= context.tuning.stringCount) {
+        if (string < 0 || string >= props.settings.stringCount) {
             return;
         }
 
         const fretIndex = Math.floor(x / layout.fretSpacing);
-        const openStringClicked = fretIndex < 0 && fretboardSettings.openStrings;
+        const openStringClicked = fretIndex < 0 && props.settings.openStrings;
         const fret = openStringClicked ? 0 : layout.firstVisibleFret + fretIndex;
 
         props.onClick({fret, string});
     }
 
-    function getAllPositions(): Position[] {
-        const result: Position[] = [];
-
-        for (let string = 0; string < context.tuning.stringCount; string++) {
-            if (fretboardSettings.openStrings) {
-                result.push({string, fret: 0});
-            }
-            for (let fret = fretboardSettings.firstFret; fret <= fretboardSettings.lastFret; fret++) {
-                result.push({string, fret});
-            }
-        }
-
-        return result;
-    }
-
     const canvasStyle = {
         width: '100%',
-        height: style.stringSpacing * context.tuning.stringCount + style.topMargin,
+        height: style.stringSpacing * props.settings.stringCount + style.topMargin,
     };
 
     return (
@@ -297,8 +300,17 @@ export default function Fretboard(props: Props) {
     );
 }
 
-function fillCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, radius: number) {
+function fillCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, radius: number, color: string) {
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
     ctx.fill();
+}
+
+function strokeCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, radius: number, color: string) {
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    ctx.stroke();
 }

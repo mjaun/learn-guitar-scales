@@ -1,12 +1,10 @@
-import {Grid, MenuItem} from "@mui/material";
 import * as React from "react";
+import {Grid, MenuItem} from "@mui/material";
 import SelectControl from './SelectControl'
-import {ContextSettings} from "../model/Context";
-import {FretboardSettings} from "./Fretboard";
+import CheckboxControl from "./CheckboxControl";
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
-import CheckboxControl from "./CheckboxControl";
 
 const rootNotes = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'];
 
@@ -41,20 +39,24 @@ const tunings: { id: string, text: string }[] = [
     {id: 'B-F#-B-E-G#-C#', text: 'Dropped B'},
 ]
 
+export interface UserSettings {
+    firstFret: number,
+    lastFret: number,
+    openStrings: boolean,
+    labels: 'scale-degrees' | 'notes',
+    root: Note;
+    scale: Scale;
+    tuning: Tuning;
+}
+
 type Props = {
-    contextSettings: ContextSettings,
-    onContextSettingsChange: (settings: ContextSettings) => void,
-    fretboardSettings: FretboardSettings,
-    onFretboardSettingsChange: (settings: FretboardSettings) => void,
+    settings: UserSettings,
+    onSettingsChange: (settings: UserSettings) => void,
 }
 
 export default function SettingsForm(props: Props) {
-    function updateFretboard(settings: Partial<FretboardSettings>) {
-        props.onFretboardSettingsChange({...props.fretboardSettings, ...settings});
-    }
-
-    function updateContext(settings: Partial<ContextSettings>) {
-        props.onContextSettingsChange({...props.contextSettings, ...settings});
+    function update(settings: Partial<UserSettings>) {
+        props.onSettingsChange({...props.settings, ...settings});
     }
 
     const selectFretItems = [];
@@ -70,8 +72,8 @@ export default function SettingsForm(props: Props) {
                     id="select-root"
                     label="Root"
                     width={80}
-                    value={props.contextSettings.root.id}
-                    onChange={value => updateContext({root: Note.fromId(value)})}
+                    value={props.settings.root.id}
+                    onChange={value => update({root: Note.fromId(value)})}
                 >
                     {rootNotes.map(name => <MenuItem key={name} value={name}>{Note.fromId(name).text}</MenuItem>)}
                 </SelectControl>
@@ -82,8 +84,8 @@ export default function SettingsForm(props: Props) {
                     id="select-scale"
                     label="Scale"
                     width={200}
-                    value={props.contextSettings.scale.id}
-                    onChange={value => updateContext({scale: Scale.fromId(value)})}
+                    value={props.settings.scale.id}
+                    onChange={value => update({scale: Scale.fromId(value)})}
                 >
                     {scales.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
                 </SelectControl>
@@ -94,8 +96,8 @@ export default function SettingsForm(props: Props) {
                     id="select-tuning"
                     label="Tuning"
                     width={150}
-                    value={props.contextSettings.tuning.id}
-                    onChange={value => updateContext({tuning: Tuning.fromId(value)})}
+                    value={props.settings.tuning.id}
+                    onChange={value => update({tuning: Tuning.fromId(value)})}
                 >
                     {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
                 </SelectControl>
@@ -106,10 +108,10 @@ export default function SettingsForm(props: Props) {
                     id="select-first-fret"
                     label="First Fret"
                     width={80}
-                    value={props.fretboardSettings.firstFret.toString()}
-                    onChange={value => updateFretboard({
+                    value={props.settings.firstFret.toString()}
+                    onChange={value => update({
                         firstFret: parseInt(value),
-                        lastFret: Math.max(parseInt(value), props.fretboardSettings.lastFret),
+                        lastFret: Math.max(parseInt(value), props.settings.lastFret),
                     })}
                 >
                     {selectFretItems}
@@ -121,9 +123,9 @@ export default function SettingsForm(props: Props) {
                     id="select-last-fret"
                     label="Last Fret"
                     width={80}
-                    value={props.fretboardSettings.lastFret.toString()}
-                    onChange={value => updateFretboard({
-                        firstFret: Math.min(parseInt(value), props.fretboardSettings.firstFret),
+                    value={props.settings.lastFret.toString()}
+                    onChange={value => update({
+                        firstFret: Math.min(parseInt(value), props.settings.firstFret),
                         lastFret: parseInt(value)
                     })}
                 >
@@ -136,8 +138,8 @@ export default function SettingsForm(props: Props) {
                     id="select-labels"
                     label="Labels"
                     width={160}
-                    value={props.fretboardSettings.labels}
-                    onChange={value => updateFretboard({labels: value as 'scale-degrees' | 'notes'})}
+                    value={props.settings.labels}
+                    onChange={value => update({labels: value as 'scale-degrees' | 'notes'})}
                 >
                     <MenuItem value="scale-degrees">Scale Degrees</MenuItem>
                     <MenuItem value="notes">Notes</MenuItem>
@@ -148,8 +150,8 @@ export default function SettingsForm(props: Props) {
                 <CheckboxControl
                     id="check-open-strings"
                     label="Open Strings"
-                    checked={props.fretboardSettings.openStrings}
-                    onChange={checked => updateFretboard({openStrings: checked})}
+                    checked={props.settings.openStrings}
+                    onChange={checked => update({openStrings: checked})}
                 />
             </Grid>
         </Grid>
