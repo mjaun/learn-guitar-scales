@@ -105,6 +105,19 @@ export default function SettingsForm(props: Props) {
 
             <Grid item xs="auto">
                 <SelectControl
+                    id="select-labels"
+                    label="Labels"
+                    width={160}
+                    value={props.settings.labels}
+                    onChange={value => update({labels: value as 'scale-degrees' | 'notes'})}
+                >
+                    <MenuItem value="scale-degrees">Scale Degrees</MenuItem>
+                    <MenuItem value="notes">Notes</MenuItem>
+                </SelectControl>
+            </Grid>
+
+            <Grid item xs="auto">
+                <SelectControl
                     id="select-first-fret"
                     label="First Fret"
                     width={80}
@@ -130,19 +143,6 @@ export default function SettingsForm(props: Props) {
                     })}
                 >
                     {selectFretItems}
-                </SelectControl>
-            </Grid>
-
-            <Grid item xs="auto">
-                <SelectControl
-                    id="select-labels"
-                    label="Labels"
-                    width={160}
-                    value={props.settings.labels}
-                    onChange={value => update({labels: value as 'scale-degrees' | 'notes'})}
-                >
-                    <MenuItem value="scale-degrees">Scale Degrees</MenuItem>
-                    <MenuItem value="notes">Notes</MenuItem>
                 </SelectControl>
             </Grid>
 
