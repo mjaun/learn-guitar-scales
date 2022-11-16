@@ -96,26 +96,12 @@ export default function Fretboard(props: Props) {
         }
 
         const fretCount = props.settings.lastFret - props.settings.firstFret + 1;
-        let fretSpacing = (containerWidth - style.fretWidth) / fretCount;
-        let additionalFrets = 0;
-
-        while (fretSpacing > style.maxFretSpacing) {
-            additionalFrets++;
-            fretSpacing = (containerWidth - style.fretWidth) / (fretCount + additionalFrets);
-        }
-
-        let firstVisibleFret = props.settings.firstFret - Math.floor(additionalFrets / 2);
-        let lastVisibleFret = props.settings.lastFret + Math.ceil(additionalFrets / 2);
-
-        while (firstVisibleFret < 1) {
-            firstVisibleFret++;
-            lastVisibleFret++;
-        }
+        let fretSpacing = Math.min((containerWidth - style.fretWidth) / fretCount, style.maxFretSpacing);
 
         setLayout({
             fretSpacing,
-            firstVisibleFret,
-            lastVisibleFret,
+            firstVisibleFret: props.settings.firstFret,
+            lastVisibleFret: props.settings.lastFret,
         });
     }
 
@@ -311,6 +297,6 @@ function strokeCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: n
     ctx.lineWidth = 5;
     ctx.strokeStyle = color;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    ctx.arc(centerX, centerY, radius - (ctx.lineWidth / 2), 0, 2 * Math.PI, false);
     ctx.stroke();
 }
