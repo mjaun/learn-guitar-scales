@@ -12,14 +12,16 @@ import Position from "./model/Position";
 
 export default function App() {
     const [settings, setSettings] = React.useState<UserSettings>({
-        firstFret: 5,
-        lastFret: 8,
-        openStrings: false,
+        firstFret: 1,
+        lastFret: 12,
+        openStrings: true,
         labels: 'scale-degrees',
         root: Note.fromId('A'),
         scale: Scale.fromId('1-b3-4-5-b7'),
         tuning: Tuning.fromId('E-A-D-G-B-E'),
     });
+
+    const [outlinedPositions, setOutlinedPositions] = React.useState<Position[]>([]);
 
     const context = new Context({
         root: settings.root,
@@ -35,29 +37,44 @@ export default function App() {
         labels: settings.labels,
     }
 
-    function getAllPositions(): Position[] {
-        const result: Position[] = [];
-
-        for (let string = 0; string < settings.tuning.stringCount; string++) {
-            if (settings.openStrings) {
-                result.push({string, fret: 0});
-            }
-            for (let fret = settings.firstFret; fret <= settings.lastFret; fret++) {
-                result.push({string, fret});
-            }
-        }
-
-        return result;
+    function positionEqual(p1: Position, p2: Position) {
+        return p1.fret === p2.fret && p1.string === p2.string;
     }
 
-    const fretboardData: FretboardData[] = getAllPositions()
-        .filter(position => context.isNoteInScale(context.getNoteByPosition(position)))
-        .map(position => ({
+    function onFretboardClick(position: Position) {
+        const index = outlinedPositions.findIndex(p => positionEqual(p, position));
+        const newPositions = outlinedPositions.slice();
+
+        if (index === -1) {
+            newPositions.push(position);
+            setOutlinedPositions(newPositions);
+        } else {
+            newPositions.splice(index, 1);
+            setOutlinedPositions(newPositions);
+        }
+    }
+
+    const fretboardData: FretboardData[] = [];
+
+    for (const position of context.getAllScalePositions()) {
+        const note = context.getNoteByPosition(position);
+        const scaleDegree = context.getScaleDegreeByPosition(position);
+
+        let visibility: 'outlined' | 'full';
+
+        if (outlinedPositions.some(p => positionEqual(p, position))) {
+            visibility = 'outlined';
+        } else {
+            visibility = 'full';
+        }
+
+        fretboardData.push({
             position,
-            scaleDegree: context.getScaleDegreeByPosition(position),
-            note: context.getNoteByPosition(position),
-            visibility: 'full',
-        }));
+            note,
+            scaleDegree,
+            visibility,
+        });
+    }
 
     return (
         <Container maxWidth="xl">
@@ -76,6 +93,7 @@ export default function App() {
                 <Fretboard
                     data={fretboardData}
                     settings={fretboardSettings}
+                    onClick={onFretboardClick}
                 />
             </Box>
         </Container>

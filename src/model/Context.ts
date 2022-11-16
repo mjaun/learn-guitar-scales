@@ -22,9 +22,23 @@ export default class Context {
         this.tuning = settings.tuning;
     }
 
-    isNoteInScale(note: Note): boolean {
-        const notesInScale = this.scale.degrees.map(d => this.getNoteByScaleDegree(d));
-        return notesInScale.some(n => n.value === note.value);
+    getAllScalePositions(): Position[] {
+        const result: Position[] = [];
+
+        for (let string = 0; string < this.tuning.stringCount; string++) {
+            for (let fret = 0; fret <= 24; fret++) {
+                const position = {string, fret};
+                const scaleDegree = this.getScaleDegreeByPosition(position);
+
+                if (!this.scale.degrees.some(d => d.value === scaleDegree.value)) {
+                    continue;
+                }
+
+                result.push(position);
+            }
+        }
+
+        return result;
     }
 
     getNoteByPosition(position: Position): Note {
