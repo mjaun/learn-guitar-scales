@@ -44,4 +44,8 @@ export default class Note {
     get naturalNote(): Note {
         return Note.fromId(this.id.charAt(0));
     }
+
+    equals(other: Note): boolean {
+        return this.id === other.id;
+    }
 }

@@ -22,23 +22,29 @@ export default class Context {
         this.tuning = settings.tuning;
     }
 
-    getAllScalePositions(): Position[] {
+    getAllPositions(): Position[] {
         const result: Position[] = [];
 
         for (let string = 0; string < this.tuning.stringCount; string++) {
             for (let fret = 0; fret <= 24; fret++) {
-                const position = {string, fret};
-                const scaleDegree = this.getScaleDegreeByPosition(position);
-
-                if (!this.scale.degrees.some(d => d.value === scaleDegree.value)) {
-                    continue;
-                }
-
-                result.push(position);
+                result.push(new Position({string, fret}));
             }
         }
 
         return result;
+    }
+
+    getAllScalePositions(): Position[] {
+        return this.getAllPositions().filter(position => {
+            const scaleDegree = this.getScaleDegreeByPosition(position);
+            return this.scale.degrees.some(d => scaleDegree.equals(d));
+        });
+    }
+
+    getAllNotePositions(note: Note): Position[] {
+        return this.getAllPositions().filter(position => {
+            return this.getNoteByPosition(position).equals(note);
+        });
     }
 
     getNoteByPosition(position: Position): Note {

@@ -51,7 +51,7 @@ interface Layout {
 type Props = {
     data: FretboardData[],
     settings: FretboardSettings,
-    onClick?: (position: Position) => void,
+    onClick?: (position: Position, ctrl: boolean) => void,
 }
 
 export default function Fretboard(props: Props) {
@@ -239,7 +239,7 @@ export default function Fretboard(props: Props) {
         ctx.restore();
     }
 
-    function onClick(x: number, y: number) {
+    function onClick(x: number, y: number, ctrl: boolean) {
         if (!(canvas.current instanceof HTMLCanvasElement)) {
             return;
         }
@@ -268,7 +268,7 @@ export default function Fretboard(props: Props) {
         const openStringClicked = fretIndex < 0 && props.settings.openStrings;
         const fret = openStringClicked ? 0 : layout.firstVisibleFret + fretIndex;
 
-        props.onClick({fret, string});
+        props.onClick(new Position({fret, string}), ctrl);
     }
 
     const canvasStyle = {
@@ -281,7 +281,7 @@ export default function Fretboard(props: Props) {
             id="fretboard"
             ref={canvas}
             style={canvasStyle}
-            onClick={(evt) => onClick(evt.clientX, evt.clientY)}
+            onClick={(evt) => onClick(evt.clientX, evt.clientY, evt.ctrlKey)}
         />
     );
 }

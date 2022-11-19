@@ -57,4 +57,8 @@ export default class ScaleDegree {
     get text(): string {
         return formatFlatSharp(this.id);
     }
+
+    equals(other: ScaleDegree): boolean {
+        return this.id === other.id;
+    }
 }

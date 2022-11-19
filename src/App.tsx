@@ -9,6 +9,7 @@ import Fretboard, {FretboardSettings, FretboardData} from './components/Fretboar
 import SettingsForm, {UserSettings} from './components/SettingsForm'
 import Context from './model/Context';
 import Position from "./model/Position";
+import PositionList from "./model/PositionList";
 
 export default function App() {
     const [settings, setSettings] = React.useState<UserSettings>({
@@ -29,6 +30,26 @@ export default function App() {
         tuning: settings.tuning,
     });
 
+    const outlinedPositionsList = PositionList.fromArray(outlinedPositions);
+    const scalePositionList = PositionList.fromArray(context.getAllScalePositions());
+
+    function onFretboardClick(position: Position, ctrl: boolean) {
+        if (!scalePositionList.contains(position)) {
+            return;
+        }
+
+        const note = context.getNoteByPosition(position);
+        const positionsToModify = ctrl ? context.getAllNotePositions(note) : position;
+
+        if (outlinedPositionsList.contains(position)) {
+            outlinedPositionsList.remove(positionsToModify);
+        } else {
+            outlinedPositionsList.add(positionsToModify);
+        }
+
+        setOutlinedPositions(outlinedPositionsList.toArray());
+    }
+
     const fretboardSettings: FretboardSettings = {
         firstFret: settings.firstFret,
         lastFret: settings.lastFret,
@@ -37,44 +58,12 @@ export default function App() {
         labels: settings.labels,
     }
 
-    function positionEqual(p1: Position, p2: Position) {
-        return p1.fret === p2.fret && p1.string === p2.string;
-    }
-
-    function onFretboardClick(position: Position) {
-        const index = outlinedPositions.findIndex(p => positionEqual(p, position));
-        const newPositions = outlinedPositions.slice();
-
-        if (index === -1) {
-            newPositions.push(position);
-            setOutlinedPositions(newPositions);
-        } else {
-            newPositions.splice(index, 1);
-            setOutlinedPositions(newPositions);
-        }
-    }
-
-    const fretboardData: FretboardData[] = [];
-
-    for (const position of context.getAllScalePositions()) {
-        const note = context.getNoteByPosition(position);
-        const scaleDegree = context.getScaleDegreeByPosition(position);
-
-        let visibility: 'outlined' | 'full';
-
-        if (outlinedPositions.some(p => positionEqual(p, position))) {
-            visibility = 'outlined';
-        } else {
-            visibility = 'full';
-        }
-
-        fretboardData.push({
-            position,
-            note,
-            scaleDegree,
-            visibility,
-        });
-    }
+    const fretboardData: FretboardData[] = scalePositionList.toArray().map(position => ({
+        position,
+        note: context.getNoteByPosition(position),
+        scaleDegree: context.getScaleDegreeByPosition(position),
+        visibility: outlinedPositionsList.contains(position) ? 'outlined' : 'full',
+    }));
 
     return (
         <Container maxWidth="xl">
@@ -86,8 +75,14 @@ export default function App() {
             <Box marginY={2}>
                 <SettingsForm
                     settings={settings}
-                    onSettingsChange={(settings) => setSettings(settings)}
+                    onSettingsChange={(settings) => {
+                        setSettings(settings);
+                        setOutlinedPositions([]);
+                    }}
                 />
+            </Box>
+            <Box marginY={2}>
+                Click on a note to outline it. Use Ctrl + Click to outline all the same notes.
             </Box>
             <Box>
                 <Fretboard
