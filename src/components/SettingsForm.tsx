@@ -1,31 +1,59 @@
 import * as React from "react";
-import {Grid, MenuItem} from "@mui/material";
+import {Grid, ListSubheader, MenuItem} from "@mui/material";
 import SelectControl from './SelectControl'
 import CheckboxControl from "./CheckboxControl";
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
 
+
 const rootNotes = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'];
 
-const scales: { id: string, text: string }[] = [
-    {id: '1', text: 'Root'},
-    {id: '1-5', text: 'Root + Fifth'},
-    {id: '1-3-5', text: 'Major Arpeggio'},
-    {id: '1-b3-5', text: 'Minor Arpeggio'},
-    {id: '1-3-5-7', text: 'Major7 Arpeggio'},
-    {id: '1-b3-5-b7', text: 'Minor7 Arpeggio'},
-    {id: '1-3-5-b7', text: 'Dominant Arpeggio'},
-    {id: '1-2-3-5-6', text: 'Major Pentatonic'},
-    {id: '1-b3-4-5-b7', text: 'Minor Pentatonic'},
-    {id: '1-2-3-4-5-6-7', text: 'Ionian'},
-    {id: '1-2-b3-4-5-6-b7', text: 'Dorian'},
-    {id: '1-b2-b3-4-5-b6-b7', text: 'Phrygian'},
-    {id: '1-2-3-#4-5-6-7', text: 'Lydian'},
-    {id: '1-2-3-4-5-6-b7', text: 'Mixolydian'},
-    {id: '1-2-b3-4-5-b6-b7', text: 'Aeolian'},
-    {id: '1-b2-b3-4-b5-b6-b7', text: 'Locrian'},
-    {id: '1-b2-2-b3-3-4-b5-5-b6-6-b7-7', text: 'Chromatic'},
+type Scales = {
+    category: string,
+    scales: { id: string, text: string }[],
+}[];
+
+const scales: Scales = [
+    {
+        category: 'Pentatonic', scales: [
+            {id: '1-2-3-5-6', text: 'Major Pentatonic'},
+            {id: '1-b3-4-5-b7', text: 'Minor Pentatonic'},
+        ]
+    },
+    {
+        category: 'Major Modes', scales: [
+            {id: '1-2-3-4-5-6-7', text: 'Ionian'},
+            {id: '1-2-b3-4-5-6-b7', text: 'Dorian'},
+            {id: '1-b2-b3-4-5-b6-b7', text: 'Phrygian'},
+            {id: '1-2-3-#4-5-6-7', text: 'Lydian'},
+            {id: '1-2-3-4-5-6-b7', text: 'Mixolydian'},
+            {id: '1-2-b3-4-5-b6-b7', text: 'Aeolian'},
+            {id: '1-b2-b3-4-b5-b6-b7', text: 'Locrian'},
+        ]
+    },
+    {
+        category: 'Arpeggios', scales: [
+            {id: '1-3-5', text: 'Major Arpeggio'},
+            {id: '1-b3-5', text: 'Minor Arpeggio'},
+            {id: '1-3-5-7', text: 'Major7 Arpeggio'},
+            {id: '1-b3-5-b7', text: 'Minor7 Arpeggio'},
+            {id: '1-3-5-b7', text: 'Dominant Arpeggio'},
+        ]
+    },
+    {
+        category: 'Blues', scales: [
+            {id: '1-2-b3-3-5-6', text: 'Major Blues'},
+            {id: '1-b3-4-b5-5-b7', text: 'Minor Blues'},
+        ]
+    },
+    {
+        category: 'Various', scales: [
+            {id: '1', text: 'Roots'},
+            {id: '1-5', text: 'Roots + Fifths'},
+            {id: '1-b2-2-b3-3-4-b5-5-b6-6-b7-7', text: 'Chromatic'},
+        ]
+    },
 ];
 
 const tunings: { id: string, text: string }[] = [
@@ -65,6 +93,15 @@ export default function SettingsForm(props: Props) {
         selectFretItems.push(<MenuItem key={fret} value={fret}>{fret}</MenuItem>);
     }
 
+    const selectScaleItems = [];
+
+    for (let i = 0; i < scales.length; i++) {
+        selectScaleItems.push(<ListSubheader key={`category${i}`}>{scales[i].category}</ListSubheader>)
+        for (const scale of scales[i].scales) {
+            selectScaleItems.push(<MenuItem key={scale.id} value={scale.id}>{scale.text}</MenuItem>)
+        }
+    }
+
     return (
         <Grid container alignItems="center" spacing={2}>
             <Grid item xs="auto">
@@ -87,7 +124,7 @@ export default function SettingsForm(props: Props) {
                     value={props.settings.scale.id}
                     onChange={value => update({scale: Scale.fromId(value)})}
                 >
-                    {scales.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
+                    {selectScaleItems}
                 </SelectControl>
             </Grid>
 
