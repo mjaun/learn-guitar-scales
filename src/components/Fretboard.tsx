@@ -72,13 +72,11 @@ export default function Fretboard(props: Props) {
     }, []);
 
     React.useEffect(() => {
+        updateDimensions();
+
         const listener = () => updateDimensions();
         window.addEventListener('resize', listener);
         return () => window.removeEventListener('resize', listener);
-    }, []);
-
-    React.useEffect(() => {
-        updateDimensions();
     }, [props.settings]);
 
     React.useEffect(() => {
