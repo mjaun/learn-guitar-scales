@@ -8,8 +8,7 @@ import Note from './model/Note';
 import Fretboard, {FretboardSettings, FretboardData} from './components/Fretboard'
 import SettingsForm, {UserSettings} from './components/SettingsForm'
 import Context from './model/Context';
-import Position from "./model/Position";
-import PositionList from "./model/PositionList";
+import Position, {PositionSet} from "./model/Position";
 
 export default function App() {
     const [settings, setSettings] = React.useState<UserSettings>({
@@ -30,24 +29,24 @@ export default function App() {
         tuning: settings.tuning,
     });
 
-    const outlinedPositionsList = PositionList.fromArray(outlinedPositions);
-    const scalePositionList = PositionList.fromArray(context.getAllScalePositions());
+    const outlinedPositionSet = PositionSet.fromArray(outlinedPositions);
+    const scalePositionSet = PositionSet.fromArray(context.getAllScalePositions());
 
     function onFretboardClick(position: Position, ctrl: boolean) {
-        if (!scalePositionList.contains(position)) {
+        if (!scalePositionSet.contains(position)) {
             return;
         }
 
         const note = context.getNoteByPosition(position);
         const positionsToModify = ctrl ? context.getAllNotePositions(note) : position;
 
-        if (outlinedPositionsList.contains(position)) {
-            outlinedPositionsList.remove(positionsToModify);
+        if (outlinedPositionSet.contains(position)) {
+            outlinedPositionSet.remove(positionsToModify);
         } else {
-            outlinedPositionsList.add(positionsToModify);
+            outlinedPositionSet.add(positionsToModify);
         }
 
-        setOutlinedPositions(outlinedPositionsList.toArray());
+        setOutlinedPositions(outlinedPositionSet.toArray());
     }
 
     const fretboardSettings: FretboardSettings = {
@@ -58,11 +57,11 @@ export default function App() {
         labels: settings.labels,
     }
 
-    const fretboardData: FretboardData[] = scalePositionList.toArray().map(position => ({
+    const fretboardData: FretboardData[] = scalePositionSet.toArray().map(position => ({
         position,
         note: context.getNoteByPosition(position),
         scaleDegree: context.getScaleDegreeByPosition(position),
-        visibility: outlinedPositionsList.contains(position) ? 'outlined' : 'full',
+        visibility: outlinedPositionSet.contains(position) ? 'outlined' : 'full',
     }));
 
     return (
