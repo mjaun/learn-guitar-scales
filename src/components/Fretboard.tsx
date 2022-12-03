@@ -30,9 +30,9 @@ const style = {
     fretColor: 'gray',
     fretMarkerColor: 'gray',
     fretMarkerTextColor: 'black',
-    fretMarkerTextFont: '24px Roboto',
+    fretMarkerTextFont: '24px Arial',
     positionTextColor: 'white',
-    positionTextFont: 'bold 24px Roboto',
+    positionTextFont: 'bold 24px Arial',
     fretboardColor: 'bisque',
 };
 
