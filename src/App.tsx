@@ -12,9 +12,8 @@ import Position, {PositionSet} from "./model/Position";
 
 export default function App() {
     const [settings, setSettings] = React.useState<UserSettings>({
-        firstFret: 1,
-        lastFret: 12,
-        openStrings: true,
+        firstFret: 0,
+        lastFret: 15,
         labels: 'scale-degrees',
         root: Note.fromId('A'),
         scale: Scale.fromId('1-b3-4-5-b7'),
@@ -52,7 +51,6 @@ export default function App() {
     const fretboardSettings: FretboardSettings = {
         firstFret: settings.firstFret,
         lastFret: settings.lastFret,
-        openStrings: settings.openStrings,
         stringCount: settings.tuning.stringCount,
         labels: settings.labels,
     }

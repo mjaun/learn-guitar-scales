@@ -70,7 +70,6 @@ const tunings: { id: string, text: string }[] = [
 export interface UserSettings {
     firstFret: number,
     lastFret: number,
-    openStrings: boolean,
     labels: 'scale-degrees' | 'notes',
     root: Note;
     scale: Scale;
@@ -89,7 +88,7 @@ export default function SettingsForm(props: Props) {
 
     const selectFretItems = [];
 
-    for (let fret = 1; fret <= 24; fret++) {
+    for (let fret = 0; fret <= 24; fret++) {
         selectFretItems.push(<MenuItem key={fret} value={fret}>{fret}</MenuItem>);
     }
 
@@ -181,15 +180,6 @@ export default function SettingsForm(props: Props) {
                 >
                     {selectFretItems}
                 </SelectControl>
-            </Grid>
-
-            <Grid item xs="auto">
-                <CheckboxControl
-                    id="check-open-strings"
-                    label="Open Strings"
-                    checked={props.settings.openStrings}
-                    onChange={checked => update({openStrings: checked})}
-                />
             </Grid>
         </Grid>
     );

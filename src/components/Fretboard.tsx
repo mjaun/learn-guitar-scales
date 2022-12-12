@@ -47,7 +47,6 @@ export interface FretboardSettings {
     firstFret: number,
     lastFret: number,
     stringCount: number,
-    openStrings: boolean,
     labels: 'notes' | 'scale-degrees',
 }
 
@@ -64,6 +63,10 @@ type Props = {
 }
 
 export default function Fretboard(props: Props) {
+    const firstFret = Math.max(props.settings.firstFret, 1);
+    const lastFret = props.settings.lastFret;
+    const openStrings = props.settings.firstFret === 0;
+
     const container = React.useRef<null | HTMLDivElement>(null);
     const canvas = React.useRef<null | HTMLCanvasElement>(null);
 
@@ -98,9 +101,9 @@ export default function Fretboard(props: Props) {
             return;
         }
 
-        const openStringsWidth = props.settings.openStrings ? style.openNoteSize : 0;
+        const openStringsWidth = openStrings ? style.openNoteSize : 0;
         const fretboardWidth = container.current.clientWidth - openStringsWidth;
-        const fretCount = props.settings.lastFret - props.settings.firstFret + 1;
+        const fretCount = lastFret - firstFret + 1;
         const fretSpacing = Math.min((fretboardWidth - style.fretWidth) / fretCount, style.maxFretSpacing);
 
         setDimensions({
@@ -125,7 +128,7 @@ export default function Fretboard(props: Props) {
         ctx.canvas.height = dimensions.height * style.scaleFactor;
         ctx.scale(style.scaleFactor, style.scaleFactor);
 
-        if (props.settings.openStrings) {
+        if (openStrings) {
             ctx.translate(style.openNoteSize, style.topMargin);
         } else {
             ctx.translate(0, style.topMargin);
@@ -134,16 +137,16 @@ export default function Fretboard(props: Props) {
         drawFretboard(ctx);
 
         for (const data of props.data) {
-            if (data.position.fret === 0 && !props.settings.openStrings) {
+            if (data.position.fret === 0 && !openStrings) {
                 continue;
             }
             if (data.position.string >= props.settings.stringCount) {
                 continue;
             }
-            if (data.position.fret !== 0 && data.position.fret < props.settings.firstFret) {
+            if (data.position.fret !== 0 && data.position.fret < firstFret) {
                 continue;
             }
-            if (data.position.fret > props.settings.lastFret) {
+            if (data.position.fret > lastFret) {
                 continue;
             }
 
@@ -152,7 +155,7 @@ export default function Fretboard(props: Props) {
     }
 
     function drawFretboard(ctx: CanvasRenderingContext2D) {
-        const fretboardWidth = (props.settings.lastFret - props.settings.firstFret + 1) * dimensions.fretSpacing;
+        const fretboardWidth = (lastFret - firstFret + 1) * dimensions.fretSpacing;
         const fretboardHeight = style.stringSpacing * props.settings.stringCount;
 
         // background
@@ -160,14 +163,14 @@ export default function Fretboard(props: Props) {
         ctx.fillRect(0, 0, fretboardWidth, fretboardHeight);
 
         // frets
-        for (let i = 0; i <= props.settings.lastFret - props.settings.firstFret + 1; i++) {
+        for (let i = 0; i <= lastFret - firstFret + 1; i++) {
             ctx.fillStyle = style.fretColor;
             ctx.fillRect(i * dimensions.fretSpacing, 0, 4, fretboardHeight);
         }
 
         // markers
-        for (let i = 0; i <= props.settings.lastFret - props.settings.firstFret; i++) {
-            let fret = props.settings.firstFret + i;
+        for (let i = 0; i <= lastFret - firstFret; i++) {
+            let fret = firstFret + i;
             let drawMarkerText = false;
             let x = (i + 0.5) * dimensions.fretSpacing;
 
@@ -207,7 +210,7 @@ export default function Fretboard(props: Props) {
         if (data.position.fret === 0) {
             ctx.translate(-0.5 * style.openNoteSize + 2, (data.position.string + 0.5) * style.stringSpacing);
         } else {
-            const visibleFretIndex = data.position.fret - props.settings.firstFret;
+            const visibleFretIndex = data.position.fret - firstFret;
             ctx.translate((visibleFretIndex + 0.5) * dimensions.fretSpacing, (data.position.string + 0.5) * style.stringSpacing);
         }
 
@@ -260,7 +263,7 @@ export default function Fretboard(props: Props) {
 
         y -= style.topMargin;
 
-        if (props.settings.openStrings) {
+        if (openStrings) {
             x -= style.openNoteSize;
         }
 
@@ -271,8 +274,8 @@ export default function Fretboard(props: Props) {
         }
 
         const fretIndex = Math.floor(x / dimensions.fretSpacing);
-        const openStringClicked = fretIndex < 0 && props.settings.openStrings;
-        const fret = openStringClicked ? 0 : props.settings.firstFret + fretIndex;
+        const openStringClicked = fretIndex < 0 && openStrings;
+        const fret = openStringClicked ? 0 : firstFret + fretIndex;
 
         props.onClick(new Position({fret, string}), ctrl);
     }
