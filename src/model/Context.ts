@@ -3,7 +3,6 @@ import Scale from "./Scale";
 import Tuning from "./Tuning";
 import ScaleDegree from "./ScaleDegree";
 import Position from "./Position";
-import {limitValue} from "./Util";
 
 export interface ContextSettings {
     readonly root: Note;
@@ -34,53 +33,54 @@ export default class Context {
         return result;
     }
 
-    getAllScalePositions(): Position[] {
+    getInScalePositions(): Position[] {
         return this.getAllPositions().filter(position => {
             const scaleDegree = this.getScaleDegreeByPosition(position);
             return this.scale.degrees.some(d => scaleDegree.equals(d));
         });
     }
 
-    getAllNotePositions(note: Note): Position[] {
+    getSameNotePositions(note: Note): Position[] {
         return this.getAllPositions().filter(position => {
-            return this.getNoteByPosition(position).equals(note);
+            return this.getNoteByPosition(position).same(note);
         });
     }
 
     getNoteByPosition(position: Position): Note {
-        const scaleDegree = this.getScaleDegreeByPosition(position);
-        return this.getNoteByScaleDegree(scaleDegree);
+        const noteValue = this.tuning.notes[position.string].value + position.fret;
+        return this.getNoteByValue(noteValue);
     }
 
     getScaleDegreeByPosition(position: Position): ScaleDegree {
-        if (position.string >= this.tuning.stringCount) {
-            throw new RangeError("Tuning doesn't have specified string.");
-        }
-
-        const noteValue = limitValue(this.tuning.notes[position.string].value + position.fret);
-        const scaleDegreeValue = limitValue(noteValue - this.root.value);
-        return this.getScaleDegreeByValue(scaleDegreeValue);
+        const noteValue = this.tuning.notes[position.string].value + position.fret;
+        const interval = noteValue - this.root.value;
+        return this.getScaleDegreeByValue(interval);
     }
 
-    private getNoteByScaleDegree(degree: ScaleDegree): Note {
-        // determine the resulting natural note
-        const naturalNoteIds = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-        const rootIndex = naturalNoteIds.indexOf(this.root.naturalNote.id);
-        const degreeOffset = parseInt(degree.naturalDegree.id) - 1;
-        const naturalNote = Note.fromId(naturalNoteIds[(rootIndex + degreeOffset) % 7]);
+    private getNoteByValue(value: number): Note {
+        const interval = value - this.root.value;
+        const scaleDegree = this.getScaleDegreeByValue(interval);
 
-        // determine the resulting note value
-        const noteValue = limitValue(this.root.value + degree.value);
+        // determine letter
+        const noteLetters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const rootLetterIndex = noteLetters.indexOf(this.root.letter);
+        const letterIndex = rootLetterIndex + (scaleDegree.number - 1);
+        const letter = noteLetters[letterIndex % 7];
 
-        // determine the sharps or flats
-        const sharps = limitValue(noteValue - naturalNote.value);
-        const flats = limitValue(naturalNote.value - noteValue);
-        const noteModifier = sharps < flats ? '#'.repeat(sharps) : 'b'.repeat(flats);
+        // determine octave
+        const octave = this.root.octave + Math.floor(interval / 12) + Math.floor(letterIndex / 7);
+        const naturalNote = new Note(letter, '', octave);
 
-        return Note.fromId(naturalNote.id + noteModifier);
+        // determine accidentals
+        const accidentalsList = ['bb', 'b', '', '#', '##'];
+        const accidentals = accidentalsList[(value - naturalNote.value) + 2];
+
+        return new Note(letter, accidentals, octave);
     }
 
     private getScaleDegreeByValue(value: number): ScaleDegree {
+        value = value % 12;
+
         // try to use the same name as in the scale
         for (const scaleDegree of this.scale.degrees) {
             if (scaleDegree.value === value) {
@@ -89,9 +89,7 @@ export default class Context {
         }
 
         // otherwise use default name
-        const defaultNames: { [index: number]: string } = {
-            0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7'
-        };
+        const defaultNames = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
 
         return ScaleDegree.fromId(defaultNames[value]);
     }

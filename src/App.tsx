@@ -15,9 +15,9 @@ export default function App() {
         firstFret: 0,
         lastFret: 15,
         labels: 'scale-degrees',
-        root: Note.fromId('A'),
+        root: Note.fromId('A0'),
         scale: Scale.fromId('1-b3-4-5-b7'),
-        tuning: Tuning.fromId('E-A-D-G-B-E'),
+        tuning: Tuning.fromId('E2-A2-D3-G3-B3-E4'),
     });
 
     const [outlinedPositions, setOutlinedPositions] = React.useState<Position[]>([]);
@@ -29,7 +29,7 @@ export default function App() {
     });
 
     const outlinedPositionSet = PositionSet.fromArray(outlinedPositions);
-    const scalePositionSet = PositionSet.fromArray(context.getAllScalePositions());
+    const scalePositionSet = PositionSet.fromArray(context.getInScalePositions());
 
     function onFretboardClick(position: Position, ctrl: boolean) {
         if (!scalePositionSet.contains(position)) {
@@ -37,7 +37,7 @@ export default function App() {
         }
 
         const note = context.getNoteByPosition(position);
-        const positionsToModify = ctrl ? context.getAllNotePositions(note) : position;
+        const positionsToModify = ctrl ? context.getSameNotePositions(note) : position;
 
         if (outlinedPositionSet.contains(position)) {
             outlinedPositionSet.remove(positionsToModify);

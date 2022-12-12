@@ -233,10 +233,10 @@ export default function Fretboard(props: Props) {
             let text = '';
 
             if (props.settings.labels === 'notes') {
-                text = data.note.text;
+                text = data.note.name;
             }
             if (props.settings.labels === 'scale-degrees') {
-                text = data.scaleDegree.text;
+                text = data.scaleDegree.name;
             }
 
             ctx.fillStyle = style.positionTextColor;

@@ -1,70 +1,69 @@
 import * as React from "react";
 import {Grid, ListSubheader, MenuItem} from "@mui/material";
 import SelectControl from './SelectControl'
-import CheckboxControl from "./CheckboxControl";
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
 
 
-const rootNotes = ['Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'];
+const rootNotes = ['Cb0', 'Gb0', 'Db0', 'Ab0', 'Eb0', 'Bb0', 'F0', 'C0', 'G0', 'D0', 'A0', 'E0', 'B0', 'F#0', 'C#0'];
 
 type Scales = {
     category: string,
-    scales: { id: string, text: string }[],
+    scales: { id: string, name: string }[],
 }[];
 
 const scales: Scales = [
     {
         category: 'Pentatonic', scales: [
-            {id: '1-2-3-5-6', text: 'Major Pentatonic'},
-            {id: '1-b3-4-5-b7', text: 'Minor Pentatonic'},
+            {id: '1-2-3-5-6', name: 'Major Pentatonic'},
+            {id: '1-b3-4-5-b7', name: 'Minor Pentatonic'},
         ]
     },
     {
         category: 'Major Modes', scales: [
-            {id: '1-2-3-4-5-6-7', text: 'Ionian'},
-            {id: '1-2-b3-4-5-6-b7', text: 'Dorian'},
-            {id: '1-b2-b3-4-5-b6-b7', text: 'Phrygian'},
-            {id: '1-2-3-#4-5-6-7', text: 'Lydian'},
-            {id: '1-2-3-4-5-6-b7', text: 'Mixolydian'},
-            {id: '1-2-b3-4-5-b6-b7', text: 'Aeolian'},
-            {id: '1-b2-b3-4-b5-b6-b7', text: 'Locrian'},
+            {id: '1-2-3-4-5-6-7', name: 'Ionian'},
+            {id: '1-2-b3-4-5-6-b7', name: 'Dorian'},
+            {id: '1-b2-b3-4-5-b6-b7', name: 'Phrygian'},
+            {id: '1-2-3-#4-5-6-7', name: 'Lydian'},
+            {id: '1-2-3-4-5-6-b7', name: 'Mixolydian'},
+            {id: '1-2-b3-4-5-b6-b7', name: 'Aeolian'},
+            {id: '1-b2-b3-4-b5-b6-b7', name: 'Locrian'},
         ]
     },
     {
         category: 'Arpeggios', scales: [
-            {id: '1-3-5', text: 'Major Arpeggio'},
-            {id: '1-b3-5', text: 'Minor Arpeggio'},
-            {id: '1-3-5-7', text: 'Major7 Arpeggio'},
-            {id: '1-b3-5-b7', text: 'Minor7 Arpeggio'},
-            {id: '1-3-5-b7', text: 'Dominant Arpeggio'},
+            {id: '1-3-5', name: 'Major Arpeggio'},
+            {id: '1-b3-5', name: 'Minor Arpeggio'},
+            {id: '1-3-5-7', name: 'Major7 Arpeggio'},
+            {id: '1-b3-5-b7', name: 'Minor7 Arpeggio'},
+            {id: '1-3-5-b7', name: 'Dominant Arpeggio'},
         ]
     },
     {
         category: 'Blues', scales: [
-            {id: '1-2-b3-3-5-6', text: 'Major Blues'},
-            {id: '1-b3-4-b5-5-b7', text: 'Minor Blues'},
+            {id: '1-2-b3-3-5-6', name: 'Major Blues'},
+            {id: '1-b3-4-b5-5-b7', name: 'Minor Blues'},
         ]
     },
     {
         category: 'Various', scales: [
-            {id: '1', text: 'Roots'},
-            {id: '1-5', text: 'Roots + Fifths'},
-            {id: '1-b2-2-b3-3-4-b5-5-b6-6-b7-7', text: 'Chromatic'},
+            {id: '1', name: 'Roots'},
+            {id: '1-5', name: 'Roots + Fifths'},
+            {id: '1-b2-2-b3-3-4-b5-5-b6-6-b7-7', name: 'Chromatic'},
         ]
     },
 ];
 
-const tunings: { id: string, text: string }[] = [
-    {id: 'E-A-D-G-B-E', text: 'E Standard'},
-    {id: 'Eb-Ab-Db-Gb-Bb-Eb', text: Note.fromId('Eb').text + ' Standard'},
-    {id: 'D-G-C-F-A-D', text: 'D Standard'},
-    {id: 'C-F-Bb-Eb-G-C', text: 'C Standard'},
-    {id: 'B-E-A-D-F#-B', text: 'B Standard'},
-    {id: 'D-A-D-G-B-E', text: 'Dropped D'},
-    {id: 'C-G-C-F-A-D', text: 'Dropped C'},
-    {id: 'B-F#-B-E-G#-C#', text: 'Dropped B'},
+const tunings: { id: string, name: string }[] = [
+    {id: 'E2-A2-D3-G3-B3-E4', name: 'E Standard'},
+    {id: 'Eb2-Ab2-Db3-Gb3-Bb3-Eb4', name: 'Eb Standard'},
+    {id: 'D2-G2-C3-F3-A3-D4', name: 'D Standard'},
+    {id: 'C2-F2-Bb2-Eb3-G3-C4', name: 'C Standard'},
+    {id: 'B1-E2-A2-D3-F#3-B3', name: 'B Standard'},
+    {id: 'D2-A2-D3-G3-B3-E4', name: 'Dropped D'},
+    {id: 'C2-G2-C3-F3-A3-D4', name: 'Dropped C'},
+    {id: 'B1-F#2-B2-E3-G#3-C#4', name: 'Dropped B'},
 ]
 
 export interface UserSettings {
@@ -97,7 +96,7 @@ export default function SettingsForm(props: Props) {
     for (let i = 0; i < scales.length; i++) {
         selectScaleItems.push(<ListSubheader key={`category${i}`}>{scales[i].category}</ListSubheader>)
         for (const scale of scales[i].scales) {
-            selectScaleItems.push(<MenuItem key={scale.id} value={scale.id}>{scale.text}</MenuItem>)
+            selectScaleItems.push(<MenuItem key={scale.id} value={scale.id}>{scale.name}</MenuItem>)
         }
     }
 
@@ -109,9 +108,9 @@ export default function SettingsForm(props: Props) {
                     label="Root"
                     width={80}
                     value={props.settings.root.id}
-                    onChange={value => update({root: Note.fromId(value)})}
+                    onChange={id => update({root: Note.fromId(id)})}
                 >
-                    {rootNotes.map(name => <MenuItem key={name} value={name}>{Note.fromId(name).text}</MenuItem>)}
+                    {rootNotes.map(id => <MenuItem key={id} value={id}>{Note.fromId(id).name}</MenuItem>)}
                 </SelectControl>
             </Grid>
 
@@ -135,7 +134,7 @@ export default function SettingsForm(props: Props) {
                     value={props.settings.tuning.id}
                     onChange={value => update({tuning: Tuning.fromId(value)})}
                 >
-                    {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.text}</MenuItem>)}
+                    {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.name}</MenuItem>)}
                 </SelectControl>
             </Grid>
 
