@@ -20,33 +20,13 @@ export default function App() {
         tuning: Tuning.fromId('E2-A2-D3-G3-B3-E4'),
     });
 
-    const [outlinedPositions, setOutlinedPositions] = React.useState<Position[]>([]);
-
     const context = new Context({
         root: settings.root,
         scale: settings.scale,
         tuning: settings.tuning,
     });
 
-    const outlinedPositionSet = PositionSet.fromArray(outlinedPositions);
     const scalePositionSet = PositionSet.fromArray(context.getInScalePositions());
-
-    function onFretboardClick(position: Position, ctrl: boolean) {
-        if (!scalePositionSet.contains(position)) {
-            return;
-        }
-
-        const note = context.getNoteByPosition(position);
-        const positionsToModify = ctrl ? context.getSameNotePositions(note) : position;
-
-        if (outlinedPositionSet.contains(position)) {
-            outlinedPositionSet.remove(positionsToModify);
-        } else {
-            outlinedPositionSet.add(positionsToModify);
-        }
-
-        setOutlinedPositions(outlinedPositionSet.toArray());
-    }
 
     const fretboardSettings: FretboardSettings = {
         firstFret: settings.firstFret,
@@ -59,7 +39,6 @@ export default function App() {
         position,
         note: context.getNoteByPosition(position),
         scaleDegree: context.getScaleDegreeByPosition(position),
-        visibility: outlinedPositionSet.contains(position) ? 'outlined' : 'full',
     }));
 
     return (
@@ -74,18 +53,13 @@ export default function App() {
                     settings={settings}
                     onSettingsChange={(settings) => {
                         setSettings(settings);
-                        setOutlinedPositions([]);
                     }}
                 />
-            </Box>
-            <Box marginY={2}>
-                Click on a note to outline it. Use Ctrl + Click to outline all the same notes.
             </Box>
             <Box>
                 <Fretboard
                     data={fretboardData}
                     settings={fretboardSettings}
-                    onClick={onFretboardClick}
                 />
             </Box>
         </Container>

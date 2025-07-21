@@ -40,7 +40,6 @@ export interface FretboardData {
     position: Position,
     scaleDegree: ScaleDegree,
     note: Note,
-    visibility: 'full' | 'outlined',
 }
 
 export interface FretboardSettings {
@@ -59,7 +58,6 @@ interface Layout {
 type Props = {
     data: FretboardData[],
     settings: FretboardSettings,
-    onClick?: (position: Position, ctrl: boolean) => void,
 }
 
 export default function Fretboard(props: Props) {
@@ -222,62 +220,23 @@ export default function Fretboard(props: Props) {
             radius = style.noteSize / 2;
         }
 
-        if (data.visibility === 'full') {
-            fillCircle(ctx, 0, 0, radius, style.scaleDegreeColors[data.scaleDegree.value]);
+        fillCircle(ctx, 0, 0, radius, style.scaleDegreeColors[data.scaleDegree.value]);
+
+        let text = '';
+
+        if (props.settings.labels === 'notes') {
+            text = data.note.name;
         }
-        if (data.visibility === 'outlined') {
-            strokeCircle(ctx, 0, 0, radius, style.scaleDegreeColors[data.scaleDegree.value]);
+        if (props.settings.labels === 'scale-degrees') {
+            text = data.scaleDegree.name;
         }
 
-        if (data.visibility !== 'outlined') {
-            let text = '';
-
-            if (props.settings.labels === 'notes') {
-                text = data.note.name;
-            }
-            if (props.settings.labels === 'scale-degrees') {
-                text = data.scaleDegree.name;
-            }
-
-            ctx.fillStyle = style.positionTextColor;
-            ctx.font = style.positionTextFont;
-            ctx.textAlign = 'center';
-            ctx.fillText(text, 0, 8);
-        }
+        ctx.fillStyle = style.positionTextColor;
+        ctx.font = style.positionTextFont;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, 0, 8);
 
         ctx.restore();
-    }
-
-    function onClick(x: number, y: number, ctrl: boolean) {
-        if (!(canvas.current instanceof HTMLCanvasElement)) {
-            return;
-        }
-
-        if (!props.onClick) {
-            return;
-        }
-
-        const rect = canvas.current.getBoundingClientRect();
-        x -= rect.left;
-        y -= rect.top;
-
-        y -= style.topMargin;
-
-        if (openStrings) {
-            x -= style.openNoteSize;
-        }
-
-        const string = Math.floor(y / style.stringSpacing);
-
-        if (string < 0 || string >= props.settings.stringCount) {
-            return;
-        }
-
-        const fretIndex = Math.floor(x / dimensions.fretSpacing);
-        const openStringClicked = fretIndex < 0 && openStrings;
-        const fret = openStringClicked ? 0 : firstFret + fretIndex;
-
-        props.onClick(new Position({fret, string}), ctrl);
     }
 
     const canvasStyle = {
@@ -290,7 +249,6 @@ export default function Fretboard(props: Props) {
             <canvas
                 ref={canvas}
                 style={canvasStyle}
-                onClick={(evt) => onClick(evt.clientX, evt.clientY, evt.ctrlKey)}
             />
         </Box>
     );
@@ -301,12 +259,4 @@ function fillCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: num
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
     ctx.fill();
-}
-
-function strokeCircle(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, radius: number, color: string) {
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = color;
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius - (ctx.lineWidth / 2), 0, 2 * Math.PI, false);
-    ctx.stroke();
 }
