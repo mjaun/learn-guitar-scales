@@ -102,7 +102,7 @@ export default function SettingsForm(props: Props) {
 
     return (
         <Grid container alignItems="center" spacing={2}>
-            <Grid item xs="auto">
+            <Grid size="auto">
                 <SelectControl
                     id="select-root"
                     label="Root"
@@ -114,7 +114,7 @@ export default function SettingsForm(props: Props) {
                 </SelectControl>
             </Grid>
 
-            <Grid item xs="auto">
+            <Grid size="auto">
                 <SelectControl
                     id="select-scale"
                     label="Scale"
@@ -126,7 +126,7 @@ export default function SettingsForm(props: Props) {
                 </SelectControl>
             </Grid>
 
-            <Grid item xs="auto">
+            <Grid size="auto">
                 <SelectControl
                     id="select-tuning"
                     label="Tuning"
@@ -138,7 +138,7 @@ export default function SettingsForm(props: Props) {
                 </SelectControl>
             </Grid>
 
-            <Grid item xs="auto">
+            <Grid size="auto">
                 <SelectControl
                     id="select-labels"
                     label="Labels"
@@ -151,7 +151,7 @@ export default function SettingsForm(props: Props) {
                 </SelectControl>
             </Grid>
 
-            <Grid item xs="auto">
+            <Grid size="auto">
                 <SelectControl
                     id="select-first-fret"
                     label="First Fret"
@@ -166,7 +166,7 @@ export default function SettingsForm(props: Props) {
                 </SelectControl>
             </Grid>
 
-            <Grid item xs="auto">
+            <Grid size="auto">
                 <SelectControl
                     id="select-last-fret"
                     label="Last Fret"
