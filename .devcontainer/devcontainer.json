@@ -1,0 +1,29 @@
+{
+  "name": "learn-guitar-scales",
+  "build": { "dockerfile": "Dockerfile" },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/learn-guitar-scales,type=bind",
+  "workspaceFolder": "/workspaces/learn-guitar-scales",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+  "mounts": [
+    "source=learn-guitar-scales-claude-config,target=/home/vscode/.claude,type=volume"
+  ],
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "App (npm start)", "onAutoForward": "notify" }
+  },
+  "remoteEnv": { "BROWSER": "none" },
+  "postCreateCommand": "npm ci",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "anthropic.claude-code"
+      ]
+    }
+  }
+}
