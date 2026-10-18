@@ -4,6 +4,7 @@ import SelectControl from './SelectControl'
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
+import {getTunings, getTuningGroups, stringCounts} from "../model/Tunings";
 import {settingsToUrl} from "../settingsStore";
 
 
@@ -55,17 +56,6 @@ const scales: Scales = [
         ]
     },
 ];
-
-const tunings: { id: string, name: string }[] = [
-    {id: 'E2-A2-D3-G3-B3-E4', name: 'E Standard'},
-    {id: 'Eb2-Ab2-Db3-Gb3-Bb3-Eb4', name: 'Eb Standard'},
-    {id: 'D2-G2-C3-F3-A3-D4', name: 'D Standard'},
-    {id: 'C2-F2-Bb2-Eb3-G3-C4', name: 'C Standard'},
-    {id: 'B1-E2-A2-D3-F#3-B3', name: 'B Standard'},
-    {id: 'D2-A2-D3-G3-B3-E4', name: 'Dropped D'},
-    {id: 'C2-G2-C3-F3-A3-D4', name: 'Dropped C'},
-    {id: 'B1-F#2-B2-E3-G#3-C#4', name: 'Dropped B'},
-]
 
 export interface UserSettings {
     firstFret: number,
@@ -120,6 +110,25 @@ export default function SettingsForm(props: Props) {
         props.onSettingsChange({...props.settings, ...settings});
     }
 
+    function changeStringCount(stringCount: number) {
+        // keep the same kind of tuning (e.g. "Drop A") if the new string count has it
+        const current = tunings.find(entry => entry.id === props.settings.tuning.id);
+        const available = getTunings(stringCount);
+        const next = available.find(entry => entry.name === current?.name) ?? available[0];
+        update({tuning: Tuning.fromId(next.id)});
+    }
+
+    const tunings = getTunings(props.settings.tuning.stringCount);
+
+    const selectTuningItems = [];
+
+    for (const group of getTuningGroups(props.settings.tuning.stringCount)) {
+        selectTuningItems.push(<ListSubheader key={`tuning-category-${group.category}`}>{group.category}</ListSubheader>);
+        for (const entry of group.tunings) {
+            selectTuningItems.push(<MenuItem key={entry.id} value={entry.id}>{entry.name}</MenuItem>);
+        }
+    }
+
     const selectFretItems = [];
 
     for (let fret = 0; fret <= 24; fret++) {
@@ -163,18 +172,6 @@ export default function SettingsForm(props: Props) {
 
             <Grid size="auto">
                 <SelectControl
-                    id="select-tuning"
-                    label="Tuning"
-                    width={150}
-                    value={props.settings.tuning.id}
-                    onChange={value => update({tuning: Tuning.fromId(value)})}
-                >
-                    {tunings.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.name}</MenuItem>)}
-                </SelectControl>
-            </Grid>
-
-            <Grid size="auto">
-                <SelectControl
                     id="select-labels"
                     label="Labels"
                     width={160}
@@ -183,6 +180,30 @@ export default function SettingsForm(props: Props) {
                 >
                     <MenuItem value="scale-degrees">Scale Degrees</MenuItem>
                     <MenuItem value="notes">Notes</MenuItem>
+                </SelectControl>
+            </Grid>
+
+            <Grid size="auto">
+                <SelectControl
+                    id="select-tuning"
+                    label="Tuning"
+                    width={150}
+                    value={props.settings.tuning.id}
+                    onChange={value => update({tuning: Tuning.fromId(value)})}
+                >
+                    {selectTuningItems}
+                </SelectControl>
+            </Grid>
+
+            <Grid size="auto">
+                <SelectControl
+                    id="select-strings"
+                    label="Strings"
+                    width={80}
+                    value={props.settings.tuning.stringCount.toString()}
+                    onChange={value => changeStringCount(parseInt(value))}
+                >
+                    {stringCounts.map(count => <MenuItem key={count} value={count}>{count}</MenuItem>)}
                 </SelectControl>
             </Grid>
 
