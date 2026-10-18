@@ -101,7 +101,7 @@ export default function SettingsForm(props: Props) {
     }
 
     return (
-        <Grid container alignItems="center" spacing={2}>
+        <Grid container spacing={2} sx={{ alignItems: "center" }}>
             <Grid size="auto">
                 <SelectControl
                     id="select-root"

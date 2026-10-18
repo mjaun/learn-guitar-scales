@@ -43,12 +43,12 @@ export default function App() {
 
     return (
         <Container maxWidth="xl">
-            <Box marginY={4}>
+            <Box sx={{ marginY: 4 }}>
                 <Typography variant="h2" component="h1" gutterBottom>
                     Learn Guitar Scales
                 </Typography>
             </Box>
-            <Box marginY={2}>
+            <Box sx={{ marginY: 2 }}>
                 <SettingsForm
                     settings={settings}
                     onSettingsChange={(settings) => {
