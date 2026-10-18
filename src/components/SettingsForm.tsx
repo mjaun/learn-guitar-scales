@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Grid, IconButton, ListSubheader, MenuItem, SvgIcon, Tooltip} from "@mui/material";
+import {Grid, IconButton, ListSubheader, MenuItem, SvgIcon, ToggleButton, ToggleButtonGroup, Tooltip} from "@mui/material";
 import SelectControl from './SelectControl'
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
@@ -7,7 +7,7 @@ import Scale from "../model/Scale";
 import {settingsToUrl} from "../settingsStore";
 
 
-const rootNotes = ['Cb0', 'Gb0', 'Db0', 'Ab0', 'Eb0', 'Bb0', 'F0', 'C0', 'G0', 'D0', 'A0', 'E0', 'B0', 'F#0', 'C#0'];
+const rootLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 type Scales = {
     category: string,
@@ -236,16 +236,53 @@ export default function SettingsForm(props: Props) {
 
     return (
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
-            <Grid size="auto">
+            <Grid size="auto" sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                 <SelectControl
                     id="select-root"
                     label="Root"
                     width={80}
-                    value={props.settings.root.id}
-                    onChange={id => update({root: Note.fromId(id)})}
+                    value={props.settings.root.letter}
+                    onChange={letter => update({root: new Note(letter, props.settings.root.accidentals, props.settings.root.octave)})}
                 >
-                    {rootNotes.map(id => <MenuItem key={id} value={id}>{Note.fromId(id).name}</MenuItem>)}
+                    {rootLetters.map(letter => <MenuItem key={letter} value={letter}>{letter}</MenuItem>)}
                 </SelectControl>
+
+                <ToggleButtonGroup
+                    exclusive
+                    aria-label="Root accidental"
+                    value={props.settings.root.accidentals}
+                    // clicking the active button deselects it (null), which means natural
+                    onChange={(_, accidentals: string | null) => update({
+                        root: new Note(props.settings.root.letter, accidentals ?? '', props.settings.root.octave),
+                    })}
+                    sx={theme => ({
+                        height: 56,
+                        // same frame colors as the outlined selects: dimmed normally, full contrast on hover
+                        '& .MuiToggleButton-root': {
+                            borderColor: theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.23)' : 'rgba(255, 255, 255, 0.23)',
+                            fontSize: '1.2rem',
+                        },
+                        '&:hover .MuiToggleButton-root': {
+                            borderColor: theme.palette.text.primary,
+                        },
+                        // focus frame like the selects: 2px in the primary color
+                        '&:focus-within': {
+                            outline: `2px solid ${theme.palette.primary.main}`,
+                            outlineOffset: -2,
+                        },
+                        '&:focus-within .MuiToggleButton-root': {
+                            borderColor: theme.palette.primary.main,
+                        },
+                        // grouped buttons draw their divider with the previous button's right border
+                        '& .MuiToggleButton-root:not(:first-of-type)': {
+                            borderLeftColor: 'transparent',
+                        },
+                    })}
+                >
+                    <ToggleButton value="b" aria-label="Flat" sx={{minWidth: 52}}>♭</ToggleButton>
+                    <ToggleButton value="" aria-label="Natural" sx={{minWidth: 52}}>♮</ToggleButton>
+                    <ToggleButton value="#" aria-label="Sharp" sx={{minWidth: 52}}>♯</ToggleButton>
+                </ToggleButtonGroup>
             </Grid>
 
             <Grid size="auto">
