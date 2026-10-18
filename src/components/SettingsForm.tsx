@@ -79,6 +79,7 @@ export interface UserSettings {
 type Props = {
     settings: UserSettings,
     onSettingsChange: (settings: UserSettings) => void,
+    fretboardCanvas: React.RefObject<HTMLCanvasElement | null>,
 }
 
 export default function SettingsForm(props: Props) {
@@ -89,6 +90,30 @@ export default function SettingsForm(props: Props) {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });
+    }
+
+    function downloadImage() {
+        const source = props.fretboardCanvas.current;
+        if (!source) {
+            return;
+        }
+
+        // the fretboard canvas is transparent, so draw it onto a white background
+        const target = document.createElement('canvas');
+        target.width = source.width;
+        target.height = source.height;
+        const ctx = target.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, target.width, target.height);
+        ctx.drawImage(source, 0, 0);
+
+        const link = document.createElement('a');
+        link.download = 'fretboard.png';
+        link.href = target.toDataURL('image/png');
+        link.click();
     }
 
     function update(settings: Partial<UserSettings>) {
@@ -196,6 +221,13 @@ export default function SettingsForm(props: Props) {
                     <IconButton color="primary" aria-label="Copy Link" onClick={copyLink}>
                         <SvgIcon>
                             <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                        </SvgIcon>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Download Image">
+                    <IconButton color="primary" aria-label="Download Image" onClick={downloadImage}>
+                        <SvgIcon>
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </SvgIcon>
                     </IconButton>
                 </Tooltip>

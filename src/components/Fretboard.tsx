@@ -58,6 +58,7 @@ interface Layout {
 type Props = {
     data: FretboardData[],
     settings: FretboardSettings,
+    canvasRef: React.RefObject<HTMLCanvasElement | null>,
 }
 
 export default function Fretboard(props: Props) {
@@ -66,7 +67,7 @@ export default function Fretboard(props: Props) {
     const openStrings = props.settings.firstFret === 0;
 
     const container = React.useRef<null | HTMLDivElement>(null);
-    const canvas = React.useRef<null | HTMLCanvasElement>(null);
+    const canvas = props.canvasRef;
 
     const [stringImage, setStringImage] = React.useState(new Image());
 

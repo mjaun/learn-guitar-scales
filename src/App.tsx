@@ -11,6 +11,8 @@ import Position, {PositionSet} from "./model/Position";
 export default function App() {
     const [settings, setSettings] = React.useState<UserSettings>(loadSettings);
 
+    const fretboardCanvas = React.useRef<HTMLCanvasElement | null>(null);
+
     React.useEffect(() => saveSettings(settings), [settings]);
 
     const context = new Context({
@@ -44,6 +46,7 @@ export default function App() {
             <Box sx={{ marginY: 2 }}>
                 <SettingsForm
                     settings={settings}
+                    fretboardCanvas={fretboardCanvas}
                     onSettingsChange={(settings) => {
                         setSettings(settings);
                     }}
@@ -53,6 +56,7 @@ export default function App() {
                 <Fretboard
                     data={fretboardData}
                     settings={fretboardSettings}
+                    canvasRef={fretboardCanvas}
                 />
             </Box>
         </Container>
