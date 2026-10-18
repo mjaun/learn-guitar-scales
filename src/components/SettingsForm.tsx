@@ -17,20 +17,41 @@ type Scales = {
 
 const scales: Scales = [
     {
+        category: 'Diatonic', scales: [
+            {id: '1-2-3-4-5-6-7', name: 'Ionian (Major)'},
+            {id: '1-2-b3-4-5-6-b7', name: 'Dorian'},
+            {id: '1-b2-b3-4-5-b6-b7', name: 'Phrygian'},
+            {id: '1-2-3-#4-5-6-7', name: 'Lydian'},
+            {id: '1-2-3-4-5-6-b7', name: 'Mixolydian'},
+            {id: '1-2-b3-4-5-b6-b7', name: 'Aeolian (Natural Minor)'},
+            {id: '1-b2-b3-4-b5-b6-b7', name: 'Locrian'},
+        ]
+    },
+    {
         category: 'Pentatonic', scales: [
             {id: '1-2-3-5-6', name: 'Major Pentatonic'},
             {id: '1-b3-4-5-b7', name: 'Minor Pentatonic'},
         ]
     },
     {
-        category: 'Major Modes', scales: [
-            {id: '1-2-3-4-5-6-7', name: 'Ionian'},
-            {id: '1-2-b3-4-5-6-b7', name: 'Dorian'},
-            {id: '1-b2-b3-4-5-b6-b7', name: 'Phrygian'},
-            {id: '1-2-3-#4-5-6-7', name: 'Lydian'},
-            {id: '1-2-3-4-5-6-b7', name: 'Mixolydian'},
-            {id: '1-2-b3-4-5-b6-b7', name: 'Aeolian'},
-            {id: '1-b2-b3-4-b5-b6-b7', name: 'Locrian'},
+        category: 'Blues', scales: [
+            {id: '1-2-b3-3-5-6', name: 'Major Blues'},
+            {id: '1-b3-4-b5-5-b7', name: 'Minor Blues'},
+        ]
+    },
+    {
+        category: 'Minor System', scales: [
+            {id: '1-2-b3-4-5-b6-7', name: 'Harmonic Minor'},
+            {id: '1-2-b3-4-5-6-7', name: 'Melodic Minor'},
+            {id: '1-b2-3-4-5-b6-b7', name: 'Phrygian Dominant'},
+            {id: '1-2-3-#4-5-6-b7', name: 'Lydian Dominant'},
+            {id: '1-b2-b3-b4-b5-b6-b7', name: 'Altered Scale (Super Locrian)'},
+        ]
+    },
+    {
+        category: 'Symmetrical', scales: [
+            {id: '1-2-b3-4-b5-b6-6-7', name: 'Diminished (Whole-Half)'},
+            {id: '1-2-3-#4-#5-b7', name: 'Whole Tone'},
         ]
     },
     {
@@ -40,12 +61,6 @@ const scales: Scales = [
             {id: '1-3-5-7', name: 'Major7 Arpeggio'},
             {id: '1-b3-5-b7', name: 'Minor7 Arpeggio'},
             {id: '1-3-5-b7', name: 'Dominant Arpeggio'},
-        ]
-    },
-    {
-        category: 'Blues', scales: [
-            {id: '1-2-b3-3-5-6', name: 'Major Blues'},
-            {id: '1-b3-4-b5-5-b7', name: 'Minor Blues'},
         ]
     },
     {
