@@ -1,9 +1,10 @@
 import * as React from "react";
-import {Grid, ListSubheader, MenuItem} from "@mui/material";
+import {Grid, IconButton, ListSubheader, MenuItem, SvgIcon, Tooltip} from "@mui/material";
 import SelectControl from './SelectControl'
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
+import {settingsToUrl} from "../settingsStore";
 
 
 const rootNotes = ['Cb0', 'Gb0', 'Db0', 'Ab0', 'Eb0', 'Bb0', 'F0', 'C0', 'G0', 'D0', 'A0', 'E0', 'B0', 'F#0', 'C#0'];
@@ -81,6 +82,15 @@ type Props = {
 }
 
 export default function SettingsForm(props: Props) {
+    const [copied, setCopied] = React.useState(false);
+
+    function copyLink() {
+        navigator.clipboard.writeText(settingsToUrl(props.settings)).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    }
+
     function update(settings: Partial<UserSettings>) {
         props.onSettingsChange({...props.settings, ...settings});
     }
@@ -179,6 +189,16 @@ export default function SettingsForm(props: Props) {
                 >
                     {selectFretItems}
                 </SelectControl>
+            </Grid>
+
+            <Grid size="auto">
+                <Tooltip title={copied ? 'Link copied!' : 'Copy Link'}>
+                    <IconButton color="primary" aria-label="Copy Link" onClick={copyLink}>
+                        <SvgIcon>
+                            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                        </SvgIcon>
+                    </IconButton>
+                </Tooltip>
             </Grid>
         </Grid>
     );
