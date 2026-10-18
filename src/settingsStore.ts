@@ -25,14 +25,28 @@ function toRecord(settings: UserSettings): Record<string, string> {
     };
 }
 
+export const stringCounts = [4, 5, 6, 7, 8];
+
 function fromRecord(stored: Record<string, string>): UserSettings {
+    const firstFret = Number(stored.firstFret);
+    const lastFret = Number(stored.lastFret);
+    const tuning = Tuning.fromId(stored.tuning);
+
+    // throw on invalid data so the caller falls back to other settings
+    if (!Number.isInteger(firstFret) || !Number.isInteger(lastFret) || firstFret < 0 || lastFret > 24 || firstFret > lastFret) {
+        throw new RangeError('Invalid fret range!');
+    }
+    if (!stringCounts.includes(tuning.stringCount)) {
+        throw new RangeError('Unsupported string count!');
+    }
+
     return {
-        firstFret: Number(stored.firstFret),
-        lastFret: Number(stored.lastFret),
+        firstFret,
+        lastFret,
         labels: stored.labels === 'notes' ? 'notes' : 'scale-degrees',
         root: Note.fromId(stored.root),
         scale: Scale.fromId(stored.scale),
-        tuning: Tuning.fromId(stored.tuning),
+        tuning,
     };
 }
 

@@ -4,7 +4,7 @@ import SelectControl from './SelectControl'
 import Note from "../model/Note";
 import Tuning from "../model/Tuning";
 import Scale from "../model/Scale";
-import {settingsToUrl} from "../settingsStore";
+import {settingsToUrl, stringCounts} from "../settingsStore";
 
 
 const rootLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
@@ -70,8 +70,6 @@ const scales: Scales = [
         ]
     },
 ];
-
-const stringCounts = [4, 5, 6, 7, 8];
 
 type TuningGroups = { category: string, tunings: { id: string, name: string }[] }[];
 

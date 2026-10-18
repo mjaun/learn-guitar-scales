@@ -75,11 +75,38 @@ export default class Context {
         const accidentalsList = ['bb', 'b', '', '#', '##'];
         const accidentals = accidentalsList[(value - naturalNote.value) + 2];
 
+        if (accidentals === undefined) {
+            return this.respell(value, value > naturalNote.value, octave);
+        }
+
         return new Note(letter, accidentals, octave);
     }
 
+    /** Enharmonic spelling with at most a double accidental, used when the scale-based spelling would need a triple one. */
+    private respell(value: number, preferSharp: boolean, octave: number): Note {
+        const noteLetters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const accidentalsList = ['bb', 'b', '', '#', '##'];
+        let best: Note | null = null;
+        let bestDistance = Infinity;
+
+        for (let o = octave - 1; o <= octave + 1; o++) {
+            for (const letter of noteLetters) {
+                const diff = value - new Note(letter, '', o).value;
+                // on a tie keep the accidental direction of the original spelling
+                const distance = Math.abs(diff) + ((diff > 0) === preferSharp ? 0 : 0.5);
+                if (Math.abs(diff) <= 2 && distance < bestDistance) {
+                    best = new Note(letter, accidentalsList[diff + 2], o);
+                    bestDistance = distance;
+                }
+            }
+        }
+
+        return best as Note;
+    }
+
     private getScaleDegreeByValue(value: number): ScaleDegree {
-        value = value % 12;
+        // normalize to 0..11 (the interval is negative for notes below the root)
+        value = ((value % 12) + 12) % 12;
 
         // try to use the same name as in the scale
         for (const scaleDegree of this.scale.degrees) {
