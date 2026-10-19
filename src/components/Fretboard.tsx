@@ -6,6 +6,7 @@ import {Box} from "@mui/material";
 
 const style = {
     scaleFactor: 2,
+    minFretSpacing: 70,
     maxFretSpacing: 125,
     stringSpacing: 55,
     markerSize: 30,
@@ -103,7 +104,10 @@ export default function Fretboard(props: Props) {
         const openStringsWidth = openStrings ? style.openNoteSize : 0;
         const fretboardWidth = container.current.clientWidth - openStringsWidth;
         const fretCount = lastFret - firstFret + 1;
-        const fretSpacing = Math.min((fretboardWidth - style.fretWidth) / fretCount, style.maxFretSpacing);
+        const fretSpacing = Math.max(
+            Math.min((fretboardWidth - style.fretWidth) / fretCount, style.maxFretSpacing),
+            style.minFretSpacing,
+        );
 
         setDimensions({
             fretSpacing,
@@ -246,10 +250,10 @@ export default function Fretboard(props: Props) {
     };
 
     return (
-        <Box ref={container}>
+        <Box ref={container} sx={{overflowX: 'auto'}}>
             <canvas
                 ref={canvas}
-                style={canvasStyle}
+                style={{...canvasStyle, display: 'block'}}
             />
         </Box>
     );

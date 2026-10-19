@@ -371,7 +371,7 @@ export default function SettingsForm(props: Props) {
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Download Image">
-                    <IconButton color="primary" aria-label="Download Image" onClick={downloadImage}>
+                    <IconButton color="primary" aria-label="Download Image" onClick={downloadImage} sx={{ml: 1}}>
                         <SvgIcon>
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </SvgIcon>
